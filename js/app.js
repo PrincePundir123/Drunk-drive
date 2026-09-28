@@ -663,12 +663,13 @@
         '<blockquote class="nudge-msg">' + esc(text) + '</blockquote>' +
         (reasons.length ? '<details><summary>What’s different?</summary><ul>' + reasons.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul></details>' : '') +
         '<div class="stack">' +
-          '<button type="button" class="btn primary" data-n="edit">Edit message</button>' +
+          '<button type="button" class="btn primary" data-n="edit" autofocus>Edit message</button>' +
           '<button type="button" class="btn secondary" data-n="send">Send anyway</button>' +
           '<button type="button" class="btn ghost" data-n="check">Check how I’m doing (1 min)</button>' +
         '</div>' +
         '<div class="timeout"><div class="timeout-bar"><span></span></div>' +
         '<p class="tiny">If there’s no answer in <b data-secs>' + secs + '</b>s, SecondLook will check in with you.</p></div>' +
+        '<div class="sr-only" aria-live="polite" data-live></div>' +
       '</div>',
       {
         label: 'Want a second look?',
@@ -681,11 +682,13 @@
           }
         }
       });
-    var bar = $('.timeout-bar span', modal.el), secsEl = $('[data-secs]', modal.el);
+    var bar = $('.timeout-bar span', modal.el), secsEl = $('[data-secs]', modal.el), live = $('[data-live]', modal.el), spoken = null;
     timer = setInterval(function () {
       var left = secs * 1000 - (Date.now() - t0);
+      var sLeft = Math.max(0, Math.ceil(left / 1000));
       bar.style.width = Math.max(0, left / (secs * 10)) + '%';
-      secsEl.textContent = Math.max(0, Math.ceil(left / 1000));
+      secsEl.textContent = sLeft;
+      if ((sLeft === 30 || sLeft === 10 || sLeft === 5) && spoken !== sLeft) { spoken = sLeft; live.textContent = sLeft + ' seconds left to answer.'; }
       if (left <= 0 && !resolved) {
         resolved = true;
         clearInterval(timer);
@@ -878,8 +881,9 @@
     if (c.stage === 'asking') {
       var left = Math.max(0, Math.ceil((c.deadline - Date.now()) / 1000));
       var total = p.settings.checkinTimeout;
-      return '<div class="ci-ring" style="--val:' + Math.round(left / total * 100) + '"><span id="ci-secs">' + left + '</span><small>sec</small></div>' +
+      return '<div class="ci-ring" style="--val:' + Math.round(left / total * 100) + '" role="timer" aria-label="Seconds left to answer"><span id="ci-secs">' + left + '</span><small>sec</small></div>' +
         '<h2 id="ci-title">Hey ' + name + ', just checking in 💙</h2>' +
+        '<div class="sr-only" aria-live="assertive" id="ci-live"></div>' +
         '<p class="muted">' + esc(c.reason) + '</p>' +
         planHtml(p, getNight(), 'the check-in') +
         (c.note ? '<p class="ci-note">' + esc(c.note) + '</p>' : '') +
@@ -1023,7 +1027,13 @@
     if (!c || c.stage !== 'asking' || !c.deadline || !p) { stopCheckinTimer(); return; }
     var left = c.deadline - Date.now();
     var secsEl = $('#ci-secs'), ring = $('.ci-ring');
-    if (secsEl) secsEl.textContent = Math.max(0, Math.ceil(left / 1000));
+    var sLeft = Math.max(0, Math.ceil(left / 1000));
+    if (secsEl) secsEl.textContent = sLeft;
+    var live = $('#ci-live');
+    if (live && (sLeft === 30 || sLeft === 10 || sLeft === 5) && live.getAttribute('data-said') !== String(sLeft)) {
+      live.setAttribute('data-said', String(sLeft));
+      live.textContent = sLeft + ' seconds left before ' + (p.consent.notifyOnTimeout ? p.contact.name + ' is alerted.' : 'this check-in ends.');
+    }
     if (ring) ring.style.setProperty('--val', Math.max(0, Math.round(left / (p.settings.checkinTimeout * 10))));
     if (left <= 0) onCheckinTimeout();
   }
@@ -1527,7 +1537,7 @@
       '<h2>Night Out check-in</h2>' +
       '<p>It’s ' + esc(fmtTime(Date.now())) + ' — how’s it going, ' + esc(p.name) + '?</p>' +
       planHtml(p, n, 'a Night Out reminder') +
-      '<div class="stack"><button type="button" class="btn primary" data-r="ok">I’m OK</button><button type="button" class="btn secondary" data-r="home">I’m heading home now</button></div>' +
+      '<div class="stack"><button type="button" class="btn primary" data-r="ok" autofocus>I’m OK</button><button type="button" class="btn secondary" data-r="home">I’m heading home now</button></div>' +
       '<div class="timeout"><div class="timeout-bar"><span></span></div><p class="tiny">If there’s no answer in <b data-secs></b>s, SecondLook will check in with you.</p></div>' +
       '<div class="sr-only" aria-live="polite" data-live></div></div>', {
         label: 'Night Out check-in',

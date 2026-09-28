@@ -7,7 +7,7 @@
   --line: #26314f;
   --text: #e8edf8;
   --muted: #9ca8c6;
-  --faint: #6f7c9c;
+  --faint: #8491b0;
   --accent: #6ee7c8;
   --accent-ink: #03261e;
   --accent-2: #a5b4fc;
@@ -138,6 +138,7 @@ input, select, textarea {
   background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius-sm);
   padding: 11px 12px; min-height: 44px;
 }
+::placeholder { color: var(--faint); opacity: 1; }
 input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(110, 231, 200, .18); }
 fieldset:disabled input, fieldset:disabled select { opacity: .55; }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
