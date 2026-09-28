@@ -3,100 +3,116 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0a0f1f">
-  <meta name="description" content="SecondLook learns your sober baseline, notices when you drift from it, and helps you get home safely — with a plan you made while sober.">
-  <title>SecondLook — the pause before a bad decision</title>
+  <meta name="theme-color" content="#F2F4F1">
+  <meta name="description" content="SecondLook lets you make the plan while you're sober, then keeps that promise later tonight: a gentle second look before a message, a check-in, a ride home.">
+  <title>SecondLook: the pause before a bad decision</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="assets/icon.svg">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <link rel="preload" href="assets/fonts/atkinson-hyperlegible-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/bricolage-grotesque-var.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body data-mode="day">
   <a class="skip" href="#app">Skip to content</a>
 
   <header class="topbar">
-    <a class="brand" href="#/home" aria-label="SecondLook home">
-      <img src="assets/icon.svg" alt="" width="28" height="28">
-      <span>SecondLook</span>
-    </a>
-    <div id="demo-badge" class="demo-badge" hidden>
+    <a class="brand" href="#/home" aria-label="SecondLook home"><svg class="eye" viewBox="0 0 120 76" data-level="ok" aria-hidden="true" focusable="false"><defs><clipPath id="eyeclip-brand"><path d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z"/></clipPath></defs><path class="eye-shape" d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z"/><g clip-path="url(#eyeclip-brand)"><circle class="eye-track" cx="60" cy="38" r="19"/><circle class="eye-iris" cx="60" cy="38" r="19" stroke-dasharray="119.38" stroke-dashoffset="0.00" transform="rotate(-90 60 38)"/><circle class="eye-pupil" cx="60" cy="38" r="10"/><rect class="eye-bar" x="55.5" y="33" width="3" height="10" rx="1.5"/><rect class="eye-bar" x="61.5" y="33" width="3" height="10" rx="1.5"/></g><path class="eye-outline" d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z"/></svg><span>SecondLook</span></a>
+    <nav id="topnav" class="topnav" aria-label="Main" hidden><a href="#/home"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></a><a href="#/chat"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 14a2 2 0 0 1-2 2H8l-5 4V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Messages</span></a><a href="#/check"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg><span>Check</span></a><a href="#/log"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg><span>Log</span></a><a href="#/settings"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg><span>Settings</span></a></nav>
+    <div id="demo-badge" class="demo-pill" hidden>
       <span>Demo</span>
-      <button type="button" id="demo-exit" class="linkish">Exit</button>
+      <button type="button" id="demo-exit">Exit</button>
     </div>
   </header>
 
   <main id="app">
-    <!-- ================= Landing ================= -->
     <section data-view="welcome" hidden>
-      <div class="hero">
-        <div class="container">
-          <p class="eyebrow">For the nights your judgment isn’t on your side</p>
-          <h1>The pause before a bad decision.</h1>
-          <p class="lead">Being drunk breaks the very judgment you’d need to notice you’re too drunk to drive. SecondLook learns your sober self, notices when you drift from it, and helps you get home — following a plan <b>you</b> made while sober.</p>
-          <div class="row-btns hero-btns">
-            <button type="button" class="btn primary big" data-go="setup">Set up SecondLook</button>
-            <button type="button" class="btn secondary big" id="try-demo">Try the 2-minute demo</button>
+      <div class="page wide">
+        <div class="hero">
+          <h1 class="hero-title">The pause before a bad decision.</h1>
+          <div class="hero-demo">
+            <div class="phone" role="img" aria-label="Demo: late at night, someone types a message full of typos to a friend. Before it sends, SecondLook asks: want a second look?">
+              <div class="phone-head" aria-hidden="true"><span class="avatar">J</span><b>Jordan</b></div>
+              <div class="phone-body" aria-hidden="true">
+                <p class="pb">are u still at the party?</p>
+                <p class="pb">how r u getting home</p>
+              </div>
+              <p class="phone-compose" aria-hidden="true"><span id="pc-text"></span><span class="caret"></span></p>
+              <div class="phone-sheet" aria-hidden="true">
+                <svg class="eye" viewBox="0 0 120 76" data-level="count" aria-hidden="true" focusable="false"><defs><clipPath id="eyeclip-demo"><path d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z"/></clipPath></defs><path class="eye-shape" d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z"/><g clip-path="url(#eyeclip-demo)"><circle class="eye-track" cx="60" cy="38" r="19"/><circle class="eye-iris" cx="60" cy="38" r="19" stroke-dasharray="119.38" stroke-dashoffset="0.00" transform="rotate(-90 60 38)"/><circle class="eye-pupil" cx="60" cy="38" r="10"/><rect class="eye-bar" x="55.5" y="33" width="3" height="10" rx="1.5"/><rect class="eye-bar" x="61.5" y="33" width="3" height="10" rx="1.5"/></g><path class="eye-outline" d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z"/></svg>
+                <p class="ps-msg" id="pc-quote"></p>
+                <b>Want a second look?</b>
+                <p>This doesn't look like how you usually text.</p>
+                <span class="fake-btn">Edit my message</span>
+                <span class="fake-btn alt">Send it anyway</span>
+              </div>
+            </div>
+            <button type="button" class="btn quiet replay" hidden>Play it again</button>
           </div>
-          <p class="muted small">Free · works in your browser · your data never leaves your device</p>
+          <div class="hero-copy">
+            <p class="lead">Drinking breaks the very judgment you'd need to notice you're too drunk to drive. SecondLook lets you make the call while you're sober, then keeps that promise for you later tonight.</p>
+            <div class="btn-row">
+              <button type="button" class="btn primary big" id="try-demo" data-demo>Try the 2-minute demo</button>
+              <button type="button" class="btn secondary big" data-go="setup">Set up SecondLook</button>
+            </div>
+            <p class="small muted">Free, and it runs in your browser. Nothing you type ever leaves your phone.</p>
+          </div>
         </div>
-      </div>
 
-      <div class="container">
-        <section class="stat-strip" aria-label="Why it matters">
-          <div><b>13,524</b><span>people died in US drunk-driving crashes in 2022</span></div>
-          <div><b>1 every 39 min</b><span>that’s how often it happens</span></div>
-          <div><b>32%</b><span>of all US traffic deaths involved a drunk driver</span></div>
+        <section class="why" aria-labelledby="why-title">
+          <p class="why-number" id="why-title">1 every 39 minutes</p>
+          <div>
+            <p>That's how often someone died in a drunk-driving crash in the US in 2022: 13,524 people, almost a third of all traffic deaths.</p>
+            <p class="src">Source: NHTSA, Traffic Safety Facts 2022.</p>
+          </div>
         </section>
-        <p class="muted tiny center">Source: NHTSA, Traffic Safety Facts 2022.</p>
 
-        <h2 class="section-title">How it works</h2>
-        <div class="how">
-          <article class="card">
-            <span class="how-num">1</span>
-            <h3>Learns your sober self</h3>
-            <p>A 2-minute baseline: how fast you react, how steady your hand is, and how you normally type. It keeps learning quietly from the messages you send on normal days.</p>
+        <section class="modes" aria-labelledby="modes-title">
+          <h2 id="modes-title">One app, two modes</h2>
+          <p class="lead">You meet SecondLook in two very different states, so it looks after you differently in each.</p>
+          <article class="mode" data-mode="day">
+            <h3>Sober Mode is where you make the plan</h3>
+            <p>Daytime, clear head, a little more detail.</p>
+            <ul>
+              <li>Pick your safe contact and what they'll hear.</li>
+              <li>A 2-minute baseline of the sober you.</li>
+              <li>Tonight's plan in your own words.</li>
+            </ul>
           </article>
-          <article class="card">
-            <span class="how-num">2</span>
-            <h3>Notices the drift</h3>
-            <p>Later in the night, it compares your typing rhythm, corrections, pauses and misspellings against <em>your</em> baseline — never against other people.</p>
+          <article class="mode" data-mode="night">
+            <h3>Night Mode is where it keeps the promise</h3>
+            <p>2am, one hand, a dark bar.</p>
+            <ul>
+              <li>One big button at a time, where your thumb is.</li>
+              <li>Your own plan first: “You said you'd take an Uber.”</li>
+              <li>Large, calm text and a countdown that never shouts.</li>
+            </ul>
           </article>
-          <article class="card">
-            <span class="how-num">3</span>
-            <h3>Steps in, gently</h3>
-            <p>“This looks a little different from how you usually text — want a second look?” A small pause, not a lecture.</p>
-          </article>
-          <article class="card">
-            <span class="how-num">4</span>
-            <h3>Brings in help</h3>
-            <p>No answer, or signs get stronger? It checks in, offers a ride, and — only if you agreed while sober — lets your safe contact know.</p>
-          </article>
-        </div>
+        </section>
 
-        <h2 class="section-title">Built on consent, not surveillance</h2>
-        <div class="card">
-          <ul class="ticks">
-            <li><b>You write the rules while sober.</b> You pick your safe contact and decide what happens if you don’t respond.</li>
-            <li><b>Nothing happens behind your back.</b> Every prompt, check-in and alert is written to a transparency log you can read and download.</li>
-            <li><b>Your sober decisions are protected.</b> After something is flagged, safety settings lock for a few hours — an impaired you can’t quietly switch them off.</li>
-            <li><b>Private by design.</b> Analysis runs on your device and only looks at timing and corrections. Nothing is uploaded.</li>
-            <li><b>Honest about limits.</b> SecondLook can’t measure blood alcohol. It never tells you you’re “fine to drive”.</li>
-          </ul>
-        </div>
+        <section class="promise" aria-labelledby="promise-title">
+          <h2 id="promise-title">A promise, not surveillance</h2>
+          <ol>
+            <li><span class="ico" aria-hidden="true"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span><p><b>You write the rules while sober.</b><span>You choose your safe contact and what happens if you don't answer.</span></p></li>
+            <li><span class="ico" aria-hidden="true"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span><p><b>Nothing happens behind your back.</b><span>Every prompt, check-in and alert goes into a log you can read and download.</span></p></li>
+            <li><span class="ico" aria-hidden="true"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span><p><b>Your sober decisions are protected.</b><span>After something is flagged, settings lock for a few hours, so a drunk you can't switch them off.</span></p></li>
+            <li><span class="ico" aria-hidden="true"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg></span><p><b>Your words stay yours.</b><span>Only typing rhythm is checked, on your device. Messages are never stored or sent.</span></p></li>
+          </ol>
+          <p class="small muted">SecondLook can't measure blood alcohol, so it never tells you you're fine to drive.</p>
+        </section>
 
-        <div class="cta card">
-          <h2>Make the plan tonight’s you will thank you for.</h2>
-          <div class="row-btns">
-            <button type="button" class="btn primary big" data-go="setup">Get started</button>
+        <section class="cta-end" aria-labelledby="cta-title">
+          <h2 id="cta-title">Make the plan tonight's you will thank you for.</h2>
+          <div class="btn-row">
+            <button type="button" class="btn primary big" data-go="setup">Set up SecondLook</button>
+            <button type="button" class="btn secondary big" data-demo>Try the demo first</button>
           </div>
-        </div>
+        </section>
+        <footer class="footer">SecondLook is a hackathon prototype. If you or someone near you is in danger, call your local emergency number (112 in India).</footer>
       </div>
-      <footer class="footer container">
-        <p>SecondLook is a prototype built for a hackathon. If you or someone near you is in danger, call your local emergency number.</p>
-      </footer>
     </section>
 
-    <!-- Views rendered by js/app.js -->
     <section data-view="setup" hidden></section>
     <section data-view="calibrate" hidden></section>
     <section data-view="home" hidden></section>
@@ -106,19 +122,13 @@
     <section data-view="settings" hidden></section>
   </main>
 
-  <nav id="tabbar" class="tabbar" aria-label="Main" hidden>
-    <a href="#/home"><span aria-hidden="true">🏠</span>Home</a>
-    <a href="#/chat"><span aria-hidden="true">💬</span>Messages</a>
-    <a href="#/check"><span aria-hidden="true">🩺</span>Check</a>
-    <a href="#/log"><span aria-hidden="true">📜</span>Log</a>
-    <a href="#/settings"><span aria-hidden="true">⚙️</span>Settings</a>
-  </nav>
+  <nav id="tabbar" class="tabbar" aria-label="Main" hidden><a href="#/home"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></a><a href="#/chat"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 14a2 2 0 0 1-2 2H8l-5 4V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Messages</span></a><a href="#/check"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg><span>Check</span></a><a href="#/log"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg><span>Log</span></a><a href="#/settings"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg><span>Settings</span></a></nav>
 
   <div id="checkin-root" hidden></div>
   <div id="modal-root"></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <noscript><p class="container">SecondLook needs JavaScript to run.</p></noscript>
+  <noscript><p class="page">SecondLook needs JavaScript to run.</p></noscript>
 
   <script src="js/storage.js"></script>
   <script src="js/words.js"></script>
@@ -129,6 +139,7 @@
   <script src="js/relay.js"></script>
   <script src="js/qr.js"></script>
   <script src="js/nightout.js"></script>
+  <script src="js/icons.js"></script>
   <script src="js/tests.js"></script>
   <script src="js/app.js"></script>
 </body>

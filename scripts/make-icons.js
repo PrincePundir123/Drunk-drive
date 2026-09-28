@@ -5,7 +5,7 @@ const path = require('path');
 const zlib = require('zlib');
 
 const ROOT = path.resolve(__dirname, '..');
-const BG = [15, 22, 41], TEAL = [110, 231, 200];
+const BG = [47, 62, 158], LINE = [255, 255, 255], AMBER = [255, 190, 85];
 
 const CRC = new Uint32Array(256).map((_, n) => {
   let c = n;
@@ -48,9 +48,9 @@ function sample(x, y) {
   const d = Math.hypot(x - 32, y - 32);
   if (d <= 9) {
     if ((x >= 28 && x <= 31 && y >= 27 && y <= 37) || (x >= 33 && x <= 36 && y >= 27 && y <= 37)) return BG;
-    return TEAL;
+    return AMBER;
   }
-  if (Math.abs(e - 1) * 15 <= 2) return TEAL; // eye outline
+  if (Math.abs(e - 1) * 15 <= 2) return LINE; // eye outline
   return BG;
 }
 
