@@ -312,6 +312,28 @@ textarea.code { font: 12px/1.4 ui-monospace, Consolas, monospace; word-break: br
 .file-btn:focus-within { outline: 3px solid var(--accent-2); outline-offset: 2px; }
 code { font-family: ui-monospace, Consolas, monospace; font-size: .9em; }
 
+/* ---------- contact link + replies ---------- */
+.qr-row { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; margin: 10px 0; }
+.qr { flex: none; width: 168px; background: #fff; border-radius: 12px; padding: 6px; }
+.qr svg { display: block; width: 100%; height: auto; }
+.qr-side { flex: 1 1 220px; min-width: 0; }
+.reply-banner { text-align: left; background: rgba(74, 222, 128, .12); border: 1px solid rgba(74, 222, 128, .5); border-radius: 14px; padding: 12px 14px; margin: 0 0 16px; }
+.reply-banner p { margin: 0 0 8px; }
+.contact-page .conn { font-size: .8rem; color: var(--muted); }
+.contact-page .conn.open { color: var(--ok); }
+.contact-page .warn { border-color: rgba(251, 191, 36, .5); color: var(--text); }
+.alert-card.urgent { border-color: rgba(251, 113, 133, .6); background: linear-gradient(0deg, rgba(251, 113, 133, .08), rgba(251, 113, 133, .08)), var(--card); }
+.alert-card.test { border-color: rgba(165, 180, 252, .5); }
+.alert-card h1 { font-size: 1.6rem; }
+.sent { color: var(--ok); font-weight: 600; margin: 12px 0 0; }
+.updates { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.updates time { color: var(--muted); font-size: .8rem; }
+.steps-list { padding-left: 20px; color: var(--muted); }
+.steps-list li { margin-bottom: 6px; }
+.topic { word-break: break-all; }
+.explainer summary { cursor: pointer; }
+.explainer p { color: var(--muted); margin-top: 10px; }
+
 /* ---------- log ---------- */
 .log { list-style: none; padding: 0; margin: 14px 0; display: grid; gap: 8px; }
 .log li { display: flex; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }

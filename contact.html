@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0f1f">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex">
+  <title>SecondLook — safe contact</title>
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="contact-page">
+  <header class="topbar">
+    <span class="brand"><img src="assets/icon.svg" alt="" width="28" height="28"><span>SecondLook</span></span>
+    <span class="conn" id="conn" aria-live="polite"></span>
+  </header>
+  <main id="app" class="container narrow">
+    <div id="banner" role="status" aria-live="polite"></div>
+    <div id="live" class="sr-only" aria-live="assertive"></div>
+    <div id="content"><p class="muted">Loading…</p></div>
+    <details class="card explainer">
+      <summary><b>What is this?</b></summary>
+      <p>Someone you care about uses <b>SecondLook</b>, an app that notices when their texting looks very different from how they normally type — for example late on a night out — and gently checks in with them.</p>
+      <p>While they were <b>sober</b>, they chose <b>you</b> as their safe contact and agreed that if they don’t answer a check-in, you get a heads-up. That’s all this page is for.</p>
+      <ul class="ticks">
+        <li>You’ll only hear something if they didn’t respond to a check-in, or when they send a test.</li>
+        <li>Details are <b>end-to-end encrypted</b>: the notification only says they may need help; the rest unlocks on this page with a key that never leaves the link they sent you.</li>
+        <li>You can’t see their messages, and you can’t track them. Location is included only if they chose to share it.</li>
+        <li>If you think they’re in danger, call your local emergency number.</li>
+      </ul>
+    </details>
+  </main>
+  <script src="js/rides.js"></script>
+  <script src="js/secure.js"></script>
+  <script src="js/relay.js"></script>
+  <script src="js/contact.js"></script>
+</body>
+</html>

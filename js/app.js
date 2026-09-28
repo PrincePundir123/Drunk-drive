@@ -8,13 +8,15 @@
   var T = window.SLTests;
   var S = window.SLStore;
   var SH = window.SLShare;
+  var SEC = window.SLSecure;
+  var RL = window.SLRelay;
   var DICT = new Set(String(window.SL_WORDS || '').split(/\s+/).filter(Boolean));
 
   var HOUR = 3600e3;
   var LOCK_WINDOW = 6 * HOUR;        // settings stay locked this long after a flag
   var UNLOCK_WINDOW = 15 * 60e3;     // passing a check unlocks settings for this long
   var SENSITIVITY = { gentle: 65, balanced: 55, protective: 45 };
-  var DEFAULT_SETTINGS = { nudgeTimeout: 45, checkinTimeout: 60, sensitivity: 'balanced', ntfyTopic: '' };
+  var DEFAULT_SETTINGS = { nudgeTimeout: 45, checkinTimeout: 60, sensitivity: 'balanced' };
   var VIEWS = ['welcome', 'setup', 'calibrate', 'home', 'chat', 'check', 'log', 'settings'];
 
   // ======================================================================
@@ -233,6 +235,7 @@
     return '' +
       '<fieldset class="group"><legend>About you</legend>' +
         '<label class="field"><span>Your first name</span><input name="name" maxlength="40" autocomplete="given-name" value="' + esc(p.name) + '" required></label>' +
+        '<label class="field"><span>Your phone number <em>(optional — lets your contact call you from an alert)</em></span><input name="myPhone" type="tel" inputmode="tel" maxlength="20" autocomplete="tel" value="' + esc(p.myPhone || '') + '"></label>' +
       '</fieldset>' +
       '<fieldset class="group"><legend>Your safe contact</legend>' +
         '<p class="hint">Someone you trust to help you get home. They only hear from SecondLook if you agree to it below.</p>' +
@@ -244,7 +247,7 @@
       '</fieldset>' +
       '<fieldset class="group"><legend>What you agree to</legend>' +
         '<label class="check"><input type="checkbox" name="notifyOnTimeout"' + checked(p.consent.notifyOnTimeout) + '><span><b>Alert my safe contact</b> if SecondLook checks in with me and I don’t respond in time.</span></label>' +
-        '<label class="check"><input type="checkbox" name="shareLocation"' + checked(p.consent.shareLocation) + '><span>Include my location in that alert.</span></label>' +
+        '<label class="check"><input type="checkbox" name="shareLocation"' + checked(p.consent.shareLocation) + '><span>Include my location and home address in that alert.</span></label>' +
         (isSetup ?
           '<label class="check"><input type="checkbox" name="transparency"><span>I understand SecondLook will <b>always tell me</b> what it did, and log every action where I can see it.</span></label>' +
           '<label class="check"><input type="checkbox" name="sober"><span>I’m setting this up <b>while sober</b>.</span></label>' : '') +
@@ -257,11 +260,13 @@
       name: get('name'),
       contact: { name: get('contactName'), phone: get('contactPhone') },
       homeAddress: get('homeAddress'),
+      myPhone: get('myPhone'),
       consent: { notifyOnTimeout: !!fd.get('notifyOnTimeout'), shareLocation: !!fd.get('shareLocation') }
     };
     if (!out.name) return { error: 'Please add your first name.' };
     if (!out.contact.name) return { error: 'Add your safe contact’s name.' };
     if (!validPhone(out.contact.phone)) return { error: 'Add a valid phone number for your safe contact (7–15 digits, with country code).' };
+    if (out.myPhone && !validPhone(out.myPhone)) return { error: 'Your own phone number looks incomplete (7–15 digits), or leave it empty.' };
     if (isSetup && !(fd.get('transparency') && fd.get('sober'))) return { error: 'Please confirm the last two statements — they’re what make SecondLook trustworthy.' };
     return { data: out };
   }
@@ -416,7 +421,8 @@
         '<li>Open <a href="#/chat">Messages</a> and tap <b>Simulate an impaired message</b> — or type slowly with lots of corrections.</li>' +
         '<li>Ignore the prompt and watch SecondLook check in, then alert the (fictional) safe contact.</li>' +
         '<li>See every step in the <a href="#/log">Transparency log</a>.</li></ol>' +
-        '<div class="row-btns"><button class="btn secondary" data-act="own-baseline">Use my own baseline</button><button class="btn ghost" data-act="exit-demo">Exit demo</button></div></section>' : '') +
+        '<div class="row-btns"><button class="btn primary" data-act="contact-view">Open contact view (2nd window)</button><button class="btn secondary" data-act="own-baseline">Use my own baseline</button><button class="btn ghost" data-act="exit-demo">Exit demo</button></div>' +
+        '<p class="small muted">The contact view shows what Priya sees. Put it side by side with this window: alerts and replies travel end-to-end encrypted through ntfy.sh.</p></section>' : '') +
       '<div class="tiles">' +
         '<a href="#/chat" class="tile"><span class="tile-ico" aria-hidden="true">💬</span><b>Messages</b><small>Texts get a second look if they seem off</small></a>' +
         '<a href="#/check" class="tile"><span class="tile-ico" aria-hidden="true">🩺</span><b>Quick check</b><small>About a minute, compared with your baseline</small></a>' +
@@ -427,7 +433,7 @@
         '<dt>Second-look prompt waits</dt><dd>' + s.nudgeTimeout + ' s before checking in</dd>' +
         '<dt>Check-in waits</dt><dd>' + s.checkinTimeout + ' s for your answer</dd>' +
         '<dt>If you don’t answer</dt><dd>' + (p.consent.notifyOnTimeout ? 'Alert ' + esc(p.contact.name) + (p.consent.shareLocation ? ' with your location' : '') : 'Nobody is contacted (you chose this)') + '</dd>' +
-        '<dt>Instant push alerts</dt><dd>' + (s.ntfyTopic ? 'On' : 'Off') + '</dd>' +
+        '<dt>Encrypted contact link</dt><dd>' + (p.link ? 'On — ' + esc(p.contact.name) + ' gets a real notification' : 'Off (alerts open your SMS app)') + '</dd>' +
         '<dt>You agreed to this</dt><dd>' + esc(fmtDate(p.consent.agreedAt)) + '</dd>' +
       '</dl><a class="linkish" href="#/settings">Change in settings →</a></section>' +
       '<section class="card"><h2>Your sober baseline</h2>' + baselineGrid(b) +
@@ -448,6 +454,7 @@
       if (act === 'ride') openHelp();
       else if (act === 'exit-demo') { if (confirm('Exit the demo? This clears the demo profile, messages and log from this browser.')) resetAll(); }
       else if (act === 'own-baseline') go('calibrate');
+      else if (act === 'contact-view') openContactView();
     }
     return function () { root.removeEventListener('click', onHomeClick); };
   }
@@ -793,6 +800,10 @@
   function closeCheckin() {
     var st = getState();
     if (!st.checkin) return;
+    var p0 = getProfile();
+    if (st.checkin.pushed && p0 && p0.link) {
+      publishStatus(p0, p0.name + ' closed the check-in on their phone.');
+    }
     st.checkin = null;
     saveState(st);
     log('checkin', 'Check-in closed.');
@@ -843,8 +854,9 @@
           '<button type="button" class="btn secondary big" data-ci="ride">🚗 Get a ride home</button>' +
           '<button type="button" class="btn ghost" data-ci="close">I’m safe — close</button>' +
         '</div>' +
-        (!pushed && c.pushTried ? '<p class="tiny muted">The instant push alert couldn’t be delivered (no connection?). Use the SMS button above.</p>' : '') +
-        (!pushed && !c.pushTried && c.alertText ? '<p class="tiny muted">Prototype note: browsers can’t send texts silently, so this opens your SMS app with the alert pre-written. Turn on <b>instant push alerts</b> in Settings to notify ' + cname + ' automatically.</p>' : '');
+        (!pushed && c.pushTried ? '<p class="tiny muted">The encrypted alert couldn’t be delivered (no connection?). Use the SMS or WhatsApp button above.</p>' : '') +
+        (pushed ? '<p class="tiny muted">' + cname + ' got a notification saying you may need help. The details above were end-to-end encrypted.</p>' : '') +
+        (!pushed && !c.pushTried && c.alertText ? '<p class="tiny muted">Browsers can’t send texts on their own, so this opens your SMS app with the alert pre-written. Set up the <b>encrypted contact link</b> in Settings so ' + cname + ' gets a real notification automatically.</p>' : '');
     }
     if (c.stage === 'expired') {
       return '<div class="ci-icon" aria-hidden="true">🤍</div>' +
@@ -867,6 +879,7 @@
     if (checkinWidget) { checkinWidget.destroy(); checkinWidget = null; }
     if (!c || !p) {
       stopCheckinTimer();
+      syncReplySub();
       root.hidden = true;
       root.innerHTML = '';
       document.body.classList.remove('no-scroll');
@@ -874,13 +887,15 @@
     }
     root.hidden = false;
     document.body.classList.add('no-scroll');
-    root.innerHTML = '<div class="checkin level-' + (c.stage === 'alerted' ? 'high' : 'caution') + '" role="alertdialog" aria-modal="true" aria-labelledby="ci-title"><div class="checkin-inner">' + checkinBody(c, p) + '</div></div>';
+    root.innerHTML = '<div class="checkin level-' + (c.stage === 'alerted' ? 'high' : 'caution') + '" role="alertdialog" aria-modal="true" aria-labelledby="ci-title"><div class="checkin-inner"><div class="ci-replies" aria-live="assertive"></div>' + checkinBody(c, p) + '</div></div>';
 
     if (c.stage === 'proving') {
       checkinWidget = T.reactionTest($('.ci-test', root), { trials: 5, onDone: function (r) { finishProve(r); } });
     }
     if (c.stage === 'asking') startCheckinTimer(); else stopCheckinTimer();
     if (c.stage === 'alerted' && !c.alertText && !alertInFlight) sendAlert();
+    renderReplies();
+    syncReplySub();
     var title = $('#ci-title', root);
     if (title) { title.setAttribute('tabindex', '-1'); title.focus({ preventScroll: true }); }
   }
@@ -912,6 +927,8 @@
       log('alert', 'You sent the alert to ' + p.contact.name + (act === 'send-sms' ? ' by SMS.' : ' on WhatsApp.'));
     } else if (act === 'close') {
       closeCheckin();
+    } else if (act === 'thanks') {
+      sendThanks();
     }
   }
 
@@ -990,9 +1007,107 @@
     });
   }
 
-  function pushNtfy(topic, title, body) {
-    var url = 'https://ntfy.sh/' + encodeURIComponent(topic) + '?title=' + encodeURIComponent(title) + '&priority=urgent&tags=rotating_light';
-    return fetch(url, { method: 'POST', body: body }).then(function (r) { return r.ok; }).catch(function () { return false; });
+  // ---------- encrypted contact link (ntfy.sh, opt-in) ----------
+  function contactPageUrl(p, withKey) {
+    return SEC.contactUrl(new URL('contact.html', location.href.split('#')[0]).href, p.link, withKey);
+  }
+
+  /** Encrypt → publish to the data topic, then a generic notification that opens the contact page. */
+  function publishToContact(p, payload, notifyText) {
+    return SEC.encrypt(p.link.key, payload)
+      .then(function (ct) { return RL.publish(SEC.dataTopic(p.link.alertTopic), ct); })
+      .then(function (okData) {
+        if (!okData || !notifyText) return okData;
+        return RL.publish(p.link.alertTopic, notifyText, {
+          title: 'SecondLook',
+          click: contactPageUrl(p, false),
+          priority: payload.status === 'test' ? 'default' : 'urgent',
+          tags: payload.status === 'test' ? 'wave' : 'rotating_light'
+        });
+      })
+      .catch(function () { return false; });
+  }
+
+  function publishStatus(p, text) {
+    if (!p || !p.link) return Promise.resolve(false);
+    return publishToContact(p, { t: 'status', text: text, at: Date.now(), name: p.name }, null);
+  }
+
+  function alertPayload(p, status, loc) {
+    var shareHome = p.consent.shareLocation && (p.homeAddress || (p.home && isFinite(p.home.lat)));
+    return {
+      t: 'alert', status: status, at: Date.now(),
+      name: p.name, contactName: p.contact.name,
+      // Contact-facing and deliberately general: the contact learns THAT, not the details of how.
+      reason: status === 'test' ? 'This is a test.' : 'Their typing or a quick check looked very different from their sober self, and they didn’t answer a check-in in time.',
+      loc: loc || null,
+      phone: p.myPhone || null,
+      home: shareHome ? { address: p.homeAddress || '', lat: p.home ? p.home.lat : null, lng: p.home ? p.home.lng : null } : null
+    };
+  }
+
+  function openContactView() {
+    var p = getProfile();
+    if (!p) return;
+    if (!p.link) {
+      p.link = SEC.newLink();
+      saveProfile(p);
+      log('data', (p.demo ? '[Demo] ' : '') + 'Created an encrypted contact link for ' + p.contact.name + '.');
+    }
+    window.open(contactPageUrl(p, true), '_blank');
+    log('data', 'Opened the contact view (what ' + p.contact.name + ' sees).');
+  }
+
+  // ---------- replies from the contact while a check-in is open ----------
+  var REPLY_TEXT = { calling: 'is calling you now', on_my_way: 'is on the way', booking_cab: 'is booking you a cab' };
+  var replySub = null, replySubKey = '';
+  function syncReplySub() {
+    var p = getProfile(), c = getState().checkin;
+    var want = p && p.link && c ? p.link.replyTopic + '|' + c.startedAt : '';
+    if (want === replySubKey) return;
+    if (replySub) { replySub.close(); replySub = null; }
+    replySubKey = want;
+    if (!want) return;
+    try {
+      replySub = RL.subscribe([p.link.replyTopic], Math.floor(c.startedAt / 1000) - 5, onReply, function () {});
+    } catch (e) { replySub = null; } // fail open: the check-in works without replies
+  }
+  function onReply(m) {
+    var p = getProfile();
+    if (!p || !p.link || !SEC.isCiphertext(m.message)) return;
+    SEC.decrypt(p.link.key, m.message).then(function (obj) {
+      if (!obj || obj.t !== 'reply' || !REPLY_TEXT[obj.action] || typeof obj.at !== 'number') return;
+      var added = false;
+      updateCheckin(function (c) {
+        c.replies = c.replies || [];
+        if (c.replies.some(function (r) { return r.id === m.id; })) return;
+        c.replies.push({ id: m.id, action: obj.action, at: obj.at });
+        added = true;
+      });
+      if (!added) return;
+      log('contact', p.contact.name + ' replied: ' + p.contact.name + ' ' + REPLY_TEXT[obj.action] + ' (' + fmtTime(obj.at) + ').');
+      renderReplies();
+    }, function () { /* not from our contact (wrong key) — ignore */ });
+  }
+  function renderReplies() {
+    var box = $('#checkin-root .ci-replies');
+    if (!box) return;
+    var c = getState().checkin, p = getProfile();
+    var reps = (c && c.replies) || [];
+    if (!reps.length || !p) { box.innerHTML = ''; return; }
+    var last = reps[reps.length - 1];
+    box.innerHTML = '<div class="reply-banner"><p><b>💬 ' + esc(p.contact.name) + ' ' + REPLY_TEXT[last.action] + '</b> – ' + esc(fmtTime(last.at)) + '</p>' +
+      (c.thanked ? '<p class="small">You replied: “Thanks, I’m staying put” ✓</p>' : '<button type="button" class="btn secondary" data-ci="thanks">Thanks, I’m staying put</button>') + '</div>';
+  }
+  function sendThanks() {
+    var p = getProfile();
+    if (!p || !p.link) return;
+    updateCheckin(function (c) { c.thanked = true; });
+    renderReplies();
+    publishStatus(p, 'Thanks, I’m staying put.').then(function (ok) {
+      log('contact', ok ? 'You told ' + p.contact.name + ': “Thanks, I’m staying put.”' : 'Couldn’t send your reply to ' + p.contact.name + ' — call or text instead.');
+      if (!ok) { updateCheckin(function (c) { c.thanked = false; }); renderReplies(); toast('Couldn’t send — call or text instead'); }
+    });
   }
 
   async function sendAlert() {
@@ -1005,11 +1120,11 @@
       var text = alertMessage(p, loc);
       if (!updateCheckin(function (c) { c.alertText = text; })) return;
       showCheckin();
-      var topic = (p.settings.ntfyTopic || '').trim();
-      if (topic) {
-        var ok = await pushNtfy(topic, 'SecondLook: ' + p.name + ' may need help', text);
+      if (p.link) {
+        var ok = await publishToContact(p, alertPayload(p, 'alerted', loc), 'SecondLook: ' + p.name + ' may need help – tap to open');
         updateCheckin(function (c) { c.pushed = ok; c.pushTried = true; });
-        log('alert', ok ? 'Instant push alert delivered to ' + p.contact.name + '.' : 'The instant push alert couldn’t be delivered — the SMS button is ready instead.');
+        log('alert', ok ? 'Encrypted alert delivered to ' + p.contact.name + ' — their phone got a notification; the details were end-to-end encrypted.'
+                        : 'Couldn’t deliver the encrypted alert (no connection?) — the SMS and WhatsApp buttons are ready instead.');
         showCheckin();
       }
     } finally {
@@ -1083,12 +1198,6 @@
   // ======================================================================
   // view: settings (locked after a flag — the "sober you decides" rule)
   // ======================================================================
-  function randomTopic() {
-    var bytes = new Uint8Array(8);
-    (window.crypto || window.msCrypto).getRandomValues(bytes);
-    return 'secondlook-' + Array.from(bytes).map(function (x) { return (x % 36).toString(36); }).join('');
-  }
-
   function openUnlock(after) {
     var b = getBaseline();
     var w = null;
@@ -1136,14 +1245,10 @@
             '<label class="field"><span>Check-in waits</span><select name="checkinTimeout">' + [30, 60, 90, 120, 180].map(function (v) { return opt(v, s.checkinTimeout, v + ' seconds'); }).join('') + '</select></label>' +
           '</div>' +
         '</fieldset>' +
-        '<fieldset class="group"><legend>Instant push alerts (optional)</legend>' +
-          '<p class="hint">Browsers can’t send SMS on their own. For truly automatic alerts, your safe contact installs the free <a href="https://ntfy.sh" target="_blank" rel="noopener">ntfy</a> app and subscribes to your private topic. Only the alert text is sent, and only when an alert fires.</p>' +
-          '<label class="field"><span>Your private topic</span><input name="ntfyTopic" maxlength="64" placeholder="secondlook-…" value="' + esc(s.ntfyTopic) + '"></label>' +
-          '<div class="row-btns"><button type="button" class="btn ghost" id="gen-topic">Generate a private topic</button><button type="button" class="btn ghost" id="test-push">Send a test alert</button></div>' +
-        '</fieldset>' +
         '<p class="form-error" role="alert"></p>' +
         '<button class="btn primary big full" type="submit">Save changes</button>' +
       '</fieldset></form>' +
+      contactLinkCard(p, locked) +
       '<section class="card"><h2>Use it in WhatsApp, Instagram &amp; Gmail</h2>' +
         '<p class="muted">The SecondLook browser extension (Chrome or Edge) gives the same second look on WhatsApp Web, Instagram DMs and Gmail. Paste this code into the extension’s popup. It holds timing numbers and your settings — never messages.</p>' +
         '<button type="button" class="btn secondary" id="ext-export"' + (b ? '' : ' disabled') + '>Show my extension code</button>' +
@@ -1161,18 +1266,7 @@
     var unlockBtn = $('#unlock', root);
     if (unlockBtn) unlockBtn.addEventListener('click', function () { openUnlock(function () { renderView(false); }); });
 
-    $('#gen-topic', root).addEventListener('click', function () { form.elements.ntfyTopic.value = randomTopic(); });
-    $('#test-push', root).addEventListener('click', function () {
-      var topic = form.elements.ntfyTopic.value.trim();
-      if (!/^[A-Za-z0-9_-]{6,64}$/.test(topic)) { toast('Generate or enter a topic first (letters, numbers, - and _).'); return; }
-      var btn = this; btn.disabled = true;
-      pushNtfy(topic, 'SecondLook test', 'Test from ' + p.name + '’s SecondLook app. If you got this, you’ll be alerted if ' + p.name + ' ever needs help getting home.')
-        .then(function (ok) {
-          btn.disabled = false;
-          toast(ok ? 'Test alert sent ✓' : 'Couldn’t reach ntfy.sh — check your connection.');
-          log('settings', ok ? 'Sent a test push alert to topic ' + topic + '.' : 'A test push alert failed to send.');
-        });
-    });
+    wireContactLinkCard(root);
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -1180,16 +1274,13 @@
       var r = readProfileForm(form, false);
       var err = $('.form-error', form);
       if (r.error) { err.textContent = r.error; return; }
-      var topic = String(form.elements.ntfyTopic.value || '').trim();
-      if (topic && !/^[A-Za-z0-9_-]{6,64}$/.test(topic)) { err.textContent = 'The push topic can only use letters, numbers, - and _ (6–64 characters).'; return; }
       err.textContent = '';
       var old = getProfile();
       var np = Object.assign({}, old, r.data);
       np.settings = {
         sensitivity: form.elements.sensitivity.value,
         nudgeTimeout: Number(form.elements.nudgeTimeout.value),
-        checkinTimeout: Number(form.elements.checkinTimeout.value),
-        ntfyTopic: topic
+        checkinTimeout: Number(form.elements.checkinTimeout.value)
       };
       np.consent = Object.assign({}, r.data.consent, { agreedAt: old.consent.agreedAt });
       var changes = [];
@@ -1198,7 +1289,7 @@
       if (old.consent.shareLocation !== np.consent.shareLocation) { changes.push('location sharing turned ' + (np.consent.shareLocation ? 'ON' : 'OFF')); np.consent.agreedAt = Date.now(); }
       if (old.settings.sensitivity !== np.settings.sensitivity) changes.push('sensitivity set to ' + np.settings.sensitivity);
       if (old.settings.nudgeTimeout !== np.settings.nudgeTimeout || old.settings.checkinTimeout !== np.settings.checkinTimeout) changes.push('wait times ' + np.settings.nudgeTimeout + ' s / ' + np.settings.checkinTimeout + ' s');
-      if ((old.settings.ntfyTopic || '') !== topic) changes.push('instant push alerts ' + (topic ? 'ON' : 'OFF'));
+      if ((old.myPhone || '') !== (np.myPhone || '')) changes.push('your phone number ' + (np.myPhone ? 'updated' : 'removed'));
       if (old.name !== np.name) changes.push('name updated');
       if (old.homeAddress !== np.homeAddress) changes.push('home address updated');
       saveProfile(np);
@@ -1224,6 +1315,82 @@
     });
   }
 
+  function contactLinkCard(p, locked) {
+    var cname = esc(p.contact.name);
+    if (!p.link) {
+      return '<section class="card" id="link-card"><h2>Real notifications for ' + cname + '</h2>' +
+        '<p class="muted">Browsers can’t send SMS by themselves. With an <b>encrypted contact link</b>, ' + cname + ' gets a real phone notification when an alert fires — and can tap “I’m on my way” so you see it on your screen.</p>' +
+        '<ul class="ticks small"><li>Everything is end-to-end encrypted on your device (AES-GCM). The relay (ntfy.sh) only sees a generic “' + esc(p.name) + ' may need help” notification.</li>' +
+        '<li>The key lives only in the link you share with ' + cname + '. Nothing is sent until an alert fires or you send a test.</li></ul>' +
+        '<button type="button" class="btn primary" id="link-create"' + (locked ? ' disabled' : '') + '>Set up encrypted alerts</button></section>';
+    }
+    var url = contactPageUrl(p, true);
+    var isFile = location.protocol === 'file:';
+    var qr = '';
+    try { qr = window.SLQR.toSvg(url, { label: 'QR code of the contact link for ' + p.contact.name }); } catch (e) { qr = ''; }
+    return '<section class="card" id="link-card"><h2>Encrypted contact link — on</h2>' +
+      '<p class="muted">Send this private link to <b>' + cname + '</b> once. Opening it saves the key on their phone and shows how to turn on notifications.</p>' +
+      (isFile ? '<p class="form-error">You opened SecondLook as a local file, so this link won’t open on ' + cname + '’s phone. Host SecondLook (for example on GitHub Pages) and set up the link from there.</p>' : '') +
+      '<div class="qr-row">' + (qr ? '<div class="qr">' + qr + '</div>' : '') +
+      '<div class="qr-side"><label class="sr-only" for="link-url">Contact link</label><textarea id="link-url" class="code" rows="4" readonly>' + esc(url) + '</textarea>' +
+      '<div class="row-btns"><button type="button" class="btn secondary" id="link-copy">Copy link</button>' +
+      '<a class="btn secondary" id="link-wa" target="_blank" rel="noopener" href="' + esc(waLink(p.contact.phone, shareText(p, url))) + '">Share on WhatsApp</a>' +
+      '<a class="btn ghost" id="link-sms" href="' + esc(smsLink(p.contact.phone, shareText(p, url))) + '">Share by SMS</a></div></div></div>' +
+      '<div class="row-btns"><button type="button" class="btn secondary" id="link-test">Send test alert</button>' +
+      '<button type="button" class="btn ghost" id="link-preview">Preview what ' + cname + ' sees</button></div>' +
+      '<details class="small"><summary>Reset or turn off</summary><p class="muted">Resetting makes new keys — the old link stops working and you’ll need to share the new one.</p>' +
+      '<div class="row-btns"><button type="button" class="btn ghost" id="link-reset"' + (locked ? ' disabled' : '') + '>Reset link</button>' +
+      '<button type="button" class="btn danger" id="link-off"' + (locked ? ' disabled' : '') + '>Turn off</button></div></details>' +
+      '</section>';
+  }
+
+  function shareText(p, url) {
+    return 'Hi ' + p.contact.name + ', I added you as my safe contact in SecondLook. If I ever don’t answer a check-in on a night out, you’ll get an alert. Please open this link once on your phone — it saves a private key: ' + url;
+  }
+
+  function wireContactLinkCard(root) {
+    function on(id, fn) { var el = $('#' + id, root); if (el) el.addEventListener('click', fn); }
+    on('link-create', function () {
+      var p = getProfile();
+      try { p.link = SEC.newLink(); } catch (e) { toast(e.message); return; }
+      saveProfile(p);
+      log('settings', 'You set up an encrypted contact link for ' + p.contact.name + '. Nothing is sent until an alert fires or you send a test.');
+      renderView(false);
+    });
+    on('link-copy', function () {
+      window.SLRides.copyText($('#link-url', root).value).then(function (ok) { toast(ok ? 'Link copied ✓' : 'Select the link and copy it'); });
+      log('settings', 'You copied the contact link to share with ' + getProfile().contact.name + '.');
+    });
+    on('link-wa', function () { log('settings', 'You shared the contact link on WhatsApp.'); });
+    on('link-sms', function () { log('settings', 'You shared the contact link by SMS.'); });
+    on('link-preview', openContactView);
+    on('link-test', function () {
+      var p = getProfile(), btn = this;
+      btn.disabled = true;
+      publishToContact(p, alertPayload(p, 'test', null), 'SecondLook test from ' + p.name + ' – tap to open').then(function (ok) {
+        btn.disabled = false;
+        toast(ok ? 'Test alert sent ✓' : 'Couldn’t reach the alert service — check your connection.');
+        log('settings', ok ? 'You sent an encrypted test alert to ' + p.contact.name + '.' : 'A test alert to ' + p.contact.name + ' failed to send.');
+      });
+    });
+    on('link-reset', function () {
+      if (isLocked() || !confirm('Make new keys? The old link will stop working.')) return;
+      var p = getProfile();
+      p.link = SEC.newLink();
+      saveProfile(p);
+      log('settings', 'You reset the contact link. Share the new link with ' + p.contact.name + '.');
+      renderView(false);
+    });
+    on('link-off', function () {
+      if (isLocked() || !confirm('Turn off encrypted alerts? Alerts will fall back to your SMS app.')) return;
+      var p = getProfile();
+      delete p.link;
+      saveProfile(p);
+      log('settings', 'You turned off the encrypted contact link.');
+      renderView(false);
+    });
+  }
+
   function resetAll() {
     closeModal('reset');
     stopCheckinTimer();
@@ -1245,7 +1412,7 @@
       name: 'Alex', demo: true, createdAt: now - 2 * 86400e3,
       contact: { name: 'Priya', phone: '+1 555 0100' }, homeAddress: '',
       consent: { notifyOnTimeout: true, shareLocation: false, agreedAt: now - 2 * 86400e3 },
-      settings: { nudgeTimeout: 20, checkinTimeout: 30, sensitivity: 'balanced', ntfyTopic: '' }
+      settings: { nudgeTimeout: 20, checkinTimeout: 30, sensitivity: 'balanced' }
     });
     saveBaseline({
       createdAt: now - 2 * 86400e3, learned: 12,
@@ -1278,6 +1445,15 @@
       if (a) log(a.getAttribute('data-log-type') || 'action', a.getAttribute('data-log'));
     });
     window.addEventListener('hashchange', route);
+
+    // Security migration: the old plaintext ntfy topic is replaced by the encrypted contact link.
+    var oldP = S.get('profile', null);
+    if (oldP && oldP.settings && 'ntfyTopic' in oldP.settings) {
+      var had = !!oldP.settings.ntfyTopic;
+      delete oldP.settings.ntfyTopic;
+      saveProfile(oldP);
+      if (had) log('settings', 'Old unencrypted push alerts were turned off. Set up the new encrypted contact link in Settings.');
+    }
 
     // Privacy migration: older versions stored chat text and a word list. Remove both.
     S.remove('chat');

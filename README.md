@@ -57,6 +57,15 @@ How it behaves:
 
 > A full product would be a **mobile keyboard** (an Android IME or an iOS keyboard extension), so it works in every messaging app on the phone where people actually text late at night. The browser extension is the closest honest version we can build and demo on the web.
 
+## Two-way alerts with your safe contact (end-to-end encrypted)
+
+1. In **Settings → Real notifications for <contact> → Set up encrypted alerts**, SecondLook generates two random 128-bit topics (alert and reply) and a 256-bit AES-GCM key on your device.
+2. Share the link (QR code, WhatsApp or SMS). It looks like `…/contact.html?a=<alertTopic>&r=<replyTopic>#k=<key>`. The key sits in the `#fragment`, which browsers never send to a server. When your contact opens it once, the key is saved on their phone and removed from the address bar.
+3. Your contact installs the free [ntfy](https://ntfy.sh) app and subscribes to the alert topic (the page has one-tap buttons).
+4. When an alert fires, the app sends the details **encrypted** to `<alertTopic>-d`, and a generic *"SecondLook: Alex may need help – tap to open"* notification to the alert topic. ntfy.sh never sees plaintext details, and the notification link carries no key.
+5. On `contact.html`, your contact can tap **I'm calling now**, **I'm on my way** or **Can't come – book them a cab**. The encrypted reply appears as a banner on your check-in screen, and you can answer "Thanks, I'm staying put".
+6. If ntfy.sh can't be reached, or a message can't be decrypted, both sides say so clearly, and the pre-filled SMS / WhatsApp buttons still work.
+
 ## How the scoring works
 
 Each signal is converted to a z-score against your own baseline:

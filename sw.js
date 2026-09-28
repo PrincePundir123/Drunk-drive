@@ -1,8 +1,9 @@
 /* SecondLook service worker: network first, cache as offline fallback. */
-var CACHE = 'secondlook-v2';
+var CACHE = 'secondlook-v3';
 var ASSETS = [
   './', './index.html', './css/style.css', './manifest.webmanifest', './assets/icon.svg',
   './js/storage.js', './js/words.js', './js/metrics.js', './js/share.js', './js/rides.js', './js/tests.js', './js/app.js',
+  './js/secure.js', './js/relay.js', './js/qr.js', './js/contact.js', './contact.html',
   './assets/icon-192.png', './assets/icon-512.png'
 ];
 
@@ -31,7 +32,7 @@ self.addEventListener('fetch', function (e) {
         return res;
       })
       .catch(function () {
-        return caches.match(req).then(function (r) { return r || caches.match('./index.html'); });
+        return caches.match(req).then(function (r) { return r || (req.mode === 'navigate' && /contact\.html/.test(req.url) ? caches.match('./contact.html') : caches.match('./index.html')); });
       })
   );
 });
