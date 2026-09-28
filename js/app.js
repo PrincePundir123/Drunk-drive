@@ -66,8 +66,10 @@
   function saveBaseline(b) { S.set('baseline', b); }
   function getState() { return Object.assign({ flags: [], lastCheck: null, checkin: null, unlockedAt: 0 }, S.get('state', {})); }
   function saveState(st) { S.set('state', st); }
-  function getChat() { return S.get('chat', []); }
-  function saveChat(c) { S.set('chat', c.slice(-80)); }
+  // Privacy: practice-chat messages live in memory only and vanish on reload.
+  var chatMemory = [];
+  function getChat() { return chatMemory.slice(); }
+  function saveChat(c) { chatMemory = c.slice(-80); }
 
   function log(type, text) {
     var l = S.get('log', []);
@@ -295,7 +297,7 @@
       pauseRate: M.seeded(0.5, 0.5, 3),
       oddWordRate: M.seeded(0.06, 0.05, 3)
     };
-    return { createdAt: Date.now(), test: t, chat: chat, vocab: (old && old.vocab) || [], learned: (old && old.learned) || 0 };
+    return { createdAt: Date.now(), test: t, chat: chat, learned: (old && old.learned) || 0 };
   }
 
   function stepsHtml(i, steps) {
@@ -456,22 +458,19 @@
     if (!b || !b.chat) return null;
     var ks = M.analyzeKeystrokes(events);
     if (ks.chars < 12) return null; // too short to say anything
-    var sample = Object.assign({}, ks, { oddWordRate: M.oddWordRate(text, DICT, new Set(b.vocab || [])) });
+    var sample = Object.assign({}, ks, { oddWordRate: M.oddWordRate(text, DICT, null) });
     var cmp = M.compare(sample, b.chat, M.CHAT_KEYS);
     if (cmp.score == null) return null;
     cmp.sample = sample;
     return cmp;
   }
 
-  function learnFromMessage(sample, text) {
+  function learnFromMessage(sample) {
     var b = getBaseline();
     if (!b) return;
     M.CHAT_KEYS.forEach(function (k) {
       if (typeof sample[k] === 'number' && isFinite(sample[k])) b.chat[k] = M.push(b.chat[k], sample[k]);
     });
-    var vocab = new Set(b.vocab || []);
-    M.words(text).forEach(function (w) { if (!M.isKnown(w, DICT, vocab)) vocab.add(w); });
-    b.vocab = Array.from(vocab).slice(-500);
     b.learned = (b.learned || 0) + 1;
     saveBaseline(b);
   }
@@ -536,7 +535,7 @@
       rec.reset(); autosize(); paint();
       var wasNudged = draftNudged;
       draftNudged = false;
-      if (!flagged && !wasNudged && analysis && analysis.score < 40 && !recentFlags(LOCK_WINDOW).length) learnFromMessage(analysis.sample, text);
+      if (!flagged && !wasNudged && analysis && analysis.score < 40 && !recentFlags(LOCK_WINDOW).length) learnFromMessage(analysis.sample);
       if (Math.random() < 0.6) {
         timers.push(setTimeout(function () {
           var c2 = getChat();
@@ -1174,6 +1173,7 @@
     stopCheckinTimer();
     S.clearAll();
     chatDraft = '';
+    chatMemory = [];
     showCheckin();
     go('welcome');
     toast('All data deleted');
@@ -1192,12 +1192,12 @@
       settings: { nudgeTimeout: 20, checkinTimeout: 30, sensitivity: 'balanced', ntfyTopic: '' }
     });
     saveBaseline({
-      createdAt: now - 2 * 86400e3, learned: 12, vocab: [],
+      createdAt: now - 2 * 86400e3, learned: 12,
       test: { reactionMs: s(320, 45, 10), trackingErr: s(6, 1.5, 3), ikiMs: s(190, 35, 4), ikiCv: s(0.6, 0.12, 4), backspaceRate: s(0.08, 0.05, 4), pauseRate: s(0.2, 0.3, 4), typoRate: s(0.03, 0.02, 4) },
       chat: { ikiMs: s(210, 45, 12), ikiCv: s(0.65, 0.15, 12), backspaceRate: s(0.09, 0.06, 12), pauseRate: s(0.5, 0.5, 12), oddWordRate: s(0.06, 0.06, 12) }
     });
     saveState({ flags: [], lastCheck: null, checkin: null, unlockedAt: 0 });
-    S.set('chat', []);
+    chatMemory = [];
     S.set('log', [
       { at: now - 2 * 86400e3 + 60e3, type: 'baseline', text: '[Demo] You created your sober baseline. Reaction 320 ms, tracking error 6.0%.' },
       { at: now - 2 * 86400e3, type: 'setup', text: '[Demo] You set up SecondLook. Safe contact: Priya. Auto-alert on no response: ON. Share location: OFF.' }
@@ -1222,6 +1222,11 @@
       if (a) log(a.getAttribute('data-log-type') || 'action', a.getAttribute('data-log'));
     });
     window.addEventListener('hashchange', route);
+
+    // Privacy migration: older versions stored chat text and a word list. Remove both.
+    S.remove('chat');
+    var oldB = getBaseline();
+    if (oldB && oldB.vocab) { delete oldB.vocab; saveBaseline(oldB); }
 
     // A reload mid-check shouldn't leave the check-in stuck.
     var st = getState();

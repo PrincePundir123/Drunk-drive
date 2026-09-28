@@ -8,7 +8,7 @@ Drunk driving doesn't keep happening because people don't know it's dangerous. I
 
 ## What it does
 
-1. **Learns your sober self.** A 2-minute baseline measures reaction time, how steady your hand is (following a moving dot), and your typing rhythm. After that it keeps learning quietly from messages you send on normal days, including your own slang and names.
+1. **Learns your sober self.** A 2-minute baseline measures reaction time, how steady your hand is (following a moving dot), and your typing rhythm. After that it keeps learning quietly from messages you send on normal days (timing numbers only, never the words).
 2. **Notices the drift.** Before a message is sent, SecondLook compares its typing rhythm, corrections, long pauses and misspellings with *your* baseline. It never compares you with other people.
 3. **Steps in gently.** *"This looks a little different from how you usually text. Want a second look?"* You can edit, send anyway, or take a 1-minute check. It's a short pause, not a lecture.
 4. **Brings in help.** If you don't answer, or the signs get stronger (several flagged messages, or a quick check well outside your baseline), it checks in with a countdown and offers a ride (Uber, Ola, Rapido, Lyft), a text or a call to your safe contact, or a 15-second reaction check to show you're okay.

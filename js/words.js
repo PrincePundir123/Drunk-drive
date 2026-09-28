@@ -1,6 +1,6 @@
 /* SecondLook — a small everyday dictionary used to spot misspellings in messages.
  * It doesn't need to be complete: every score is compared with how YOU usually text,
- * and words you use while sober (names, slang) are learned into your personal vocabulary. */
+ * and the misspelling rate is compared with your own usual rate, so names and slang the list lacks are already "normal" for you. */
 (function (root) {
   'use strict';
   var WORDS = [
