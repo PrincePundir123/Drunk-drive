@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0f1f">
+  <meta name="description" content="SecondLook learns your sober baseline, notices when you drift from it, and helps you get home safely — with a plan you made while sober.">
+  <title>SecondLook — the pause before a bad decision</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icon.svg">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="skip" href="#app">Skip to content</a>
+
+  <header class="topbar">
+    <a class="brand" href="#/home" aria-label="SecondLook home">
+      <img src="assets/icon.svg" alt="" width="28" height="28">
+      <span>SecondLook</span>
+    </a>
+    <div id="demo-badge" class="demo-badge" hidden>
+      <span>Demo</span>
+      <button type="button" id="demo-exit" class="linkish">Exit</button>
+    </div>
+  </header>
+
+  <main id="app">
+    <!-- ================= Landing ================= -->
+    <section data-view="welcome" hidden>
+      <div class="hero">
+        <div class="container">
+          <p class="eyebrow">For the nights your judgment isn’t on your side</p>
+          <h1>The pause before a bad decision.</h1>
+          <p class="lead">Being drunk breaks the very judgment you’d need to notice you’re too drunk to drive. SecondLook learns your sober self, notices when you drift from it, and helps you get home — following a plan <b>you</b> made while sober.</p>
+          <div class="row-btns hero-btns">
+            <button type="button" class="btn primary big" data-go="setup">Set up SecondLook</button>
+            <button type="button" class="btn secondary big" id="try-demo">Try the 2-minute demo</button>
+          </div>
+          <p class="muted small">Free · works in your browser · your data never leaves your device</p>
+        </div>
+      </div>
+
+      <div class="container">
+        <section class="stat-strip" aria-label="Why it matters">
+          <div><b>13,524</b><span>people died in US drunk-driving crashes in 2022</span></div>
+          <div><b>1 every 39 min</b><span>that’s how often it happens</span></div>
+          <div><b>32%</b><span>of all US traffic deaths involved a drunk driver</span></div>
+        </section>
+        <p class="muted tiny center">Source: NHTSA, Traffic Safety Facts 2022.</p>
+
+        <h2 class="section-title">How it works</h2>
+        <div class="how">
+          <article class="card">
+            <span class="how-num">1</span>
+            <h3>Learns your sober self</h3>
+            <p>A 2-minute baseline: how fast you react, how steady your hand is, and how you normally type. It keeps learning quietly from the messages you send on normal days.</p>
+          </article>
+          <article class="card">
+            <span class="how-num">2</span>
+            <h3>Notices the drift</h3>
+            <p>Later in the night, it compares your typing rhythm, corrections, pauses and misspellings against <em>your</em> baseline — never against other people.</p>
+          </article>
+          <article class="card">
+            <span class="how-num">3</span>
+            <h3>Steps in, gently</h3>
+            <p>“This looks a little different from how you usually text — want a second look?” A small pause, not a lecture.</p>
+          </article>
+          <article class="card">
+            <span class="how-num">4</span>
+            <h3>Brings in help</h3>
+            <p>No answer, or signs get stronger? It checks in, offers a ride, and — only if you agreed while sober — lets your safe contact know.</p>
+          </article>
+        </div>
+
+        <h2 class="section-title">Built on consent, not surveillance</h2>
+        <div class="card">
+          <ul class="ticks">
+            <li><b>You write the rules while sober.</b> You pick your safe contact and decide what happens if you don’t respond.</li>
+            <li><b>Nothing happens behind your back.</b> Every prompt, check-in and alert is written to a transparency log you can read and download.</li>
+            <li><b>Your sober decisions are protected.</b> After something is flagged, safety settings lock for a few hours — an impaired you can’t quietly switch them off.</li>
+            <li><b>Private by design.</b> Analysis runs on your device and only looks at timing and corrections. Nothing is uploaded.</li>
+            <li><b>Honest about limits.</b> SecondLook can’t measure blood alcohol. It never tells you you’re “fine to drive”.</li>
+          </ul>
+        </div>
+
+        <div class="cta card">
+          <h2>Make the plan tonight’s you will thank you for.</h2>
+          <div class="row-btns">
+            <button type="button" class="btn primary big" data-go="setup">Get started</button>
+          </div>
+        </div>
+      </div>
+      <footer class="footer container">
+        <p>SecondLook is a prototype built for a hackathon. If you or someone near you is in danger, call your local emergency number.</p>
+      </footer>
+    </section>
+
+    <!-- Views rendered by js/app.js -->
+    <section data-view="setup" hidden></section>
+    <section data-view="calibrate" hidden></section>
+    <section data-view="home" hidden></section>
+    <section data-view="chat" hidden></section>
+    <section data-view="check" hidden></section>
+    <section data-view="log" hidden></section>
+    <section data-view="settings" hidden></section>
+  </main>
+
+  <nav id="tabbar" class="tabbar" aria-label="Main" hidden>
+    <a href="#/home"><span aria-hidden="true">🏠</span>Home</a>
+    <a href="#/chat"><span aria-hidden="true">💬</span>Messages</a>
+    <a href="#/check"><span aria-hidden="true">🩺</span>Check</a>
+    <a href="#/log"><span aria-hidden="true">📜</span>Log</a>
+    <a href="#/settings"><span aria-hidden="true">⚙️</span>Settings</a>
+  </nav>
+
+  <div id="checkin-root" hidden></div>
+  <div id="modal-root"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <noscript><p class="container">SecondLook needs JavaScript to run.</p></noscript>
+
+  <script src="js/storage.js"></script>
+  <script src="js/words.js"></script>
+  <script src="js/metrics.js"></script>
+  <script src="js/tests.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
