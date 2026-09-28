@@ -82,26 +82,26 @@
   function intro() {
     cleanup();
     var resume = st && st.participant && !st.done;
-    root.innerHTML = '<div class="container narrow">' +
-      '<p class="eyebrow">Validation study · about 12 minutes</p>' +
+    root.innerHTML = '<div class="page">' +
+      '<p class="stepper-label">Validation study, about 12 minutes</p>' +
       '<h1>Help test SecondLook — no alcohol involved</h1>' +
-      '<div class="card lock"><p><b>Please don’t drink for this study.</b> We never test with alcohol. Instead we use safe stand-ins that make typing and tapping harder in similar ways: using your other hand, and counting backwards out loud. They are <b>stand-ins, not intoxication</b>.</p></div>' +
-      '<div class="card"><h2>What we record</h2><ul class="ticks">' +
+      '<div class="warn"><p><b>Please don’t drink for this study.</b> We never test with alcohol. Instead we use safe stand-ins that make typing and tapping harder in similar ways: using your other hand, and counting backwards out loud. They are <b>stand-ins, not intoxication</b>.</p></div>' +
+      '<section class="section"><h2>What we record</h2><ul class="data-notes">' +
         '<li>Timing and counts only: reaction times, how closely you follow a dot, keystroke timing, corrections and pauses.</li>' +
         '<li>When you type freely, the text is read once to count misspelled words, then cleared. <b>Your words are never saved.</b></li>' +
         '<li>No name. You get an anonymous code like P01. Device info: touch or mouse, and screen width.</li>' +
         '<li>At the end you download one file and give it to the organiser. Nothing is uploaded.</li>' +
-      '</ul></div>' +
-      (resume ? '<div class="card"><p>A session for <b>' + esc(st.participant) + '</b> is in progress.</p><div class="row-btns"><button class="btn primary" id="resume">Resume</button><button class="btn ghost" id="restart">Start over</button></div></div>' : '') +
-      '<form class="card form" id="start" novalidate>' +
+      '</ul></section>' +
+      (resume ? '<div class="section"><p>A session for <b>' + esc(st.participant) + '</b> is in progress.</p><div class="btn-row"><button class="btn primary" id="resume">Resume</button><button class="btn secondary" id="restart">Start over</button></div></div>' : '') +
+      '<form class="section panel" id="start" novalidate>' +
         '<label class="field"><span>Participant code (from the organiser)</span><input name="code" maxlength="4" placeholder="P01" pattern="P[0-9]{2,3}" required></label>' +
-        '<label class="check"><input type="checkbox" name="sober"><span>I haven’t had alcohol or other substances today, and won’t during the study.</span></label>' +
-        '<label class="check"><input type="checkbox" name="ok"><span>I understand only timing is recorded, and I can stop at any time.</span></label>' +
-        '<label class="check"><input type="checkbox" name="tired"><span>Optional: it’s genuinely late or I’m tired right now — include the “tired” round too.</span></label>' +
+        '<label class="choice"><input type="checkbox" name="sober"><span>I haven’t had alcohol or other substances today, and won’t during the study.</span></label>' +
+        '<label class="choice"><input type="checkbox" name="ok"><span>I understand only timing is recorded, and I can stop at any time.</span></label>' +
+        '<label class="choice"><input type="checkbox" name="tired"><span>Optional: it’s genuinely late or I’m tired right now. Include the “tired” round too.</span></label>' +
         '<p class="form-error" role="alert"></p>' +
         '<button class="btn primary big full" type="submit">Start with the baseline</button>' +
       '</form>' +
-      '<div class="card"><h2>Coming back for the tired round?</h2><p class="muted">Load your earlier file to add a “tired / late night” round to it.</p>' +
+      '<div class="section"><h2>Coming back for the tired round?</h2><p class="muted">Load your earlier file to add a “tired / late night” round to it.</p>' +
         '<label class="btn secondary file-btn">Load my file<input type="file" id="cont" accept=".json,application/json"></label><p class="form-error" id="cont-err" role="alert"></p></div>' +
       '</div>';
     if (resume) {
@@ -153,7 +153,7 @@
       cleanup();
       if (i >= steps.length) { done(results); return; }
       var s = steps[i];
-      root.innerHTML = '<div class="container narrow"><p class="eyebrow">' + esc(title) + ' · step ' + (i + 1) + ' of ' + steps.length + '</p>' +
+      root.innerHTML = '<div class="page"><div class="stepper"><p class="stepper-label">' + esc(title) + ', step ' + (i + 1) + ' of ' + steps.length + '</p><div class="stepper-bar"><span style="width:' + Math.round((i + 1) / steps.length * 100) + '%"></span></div></div>' +
         '<h1>' + esc(s.title) + '</h1><p class="lead">' + esc(s.desc) + '</p>' +
         (s.reminder ? '<p class="ci-note">' + esc(s.reminder) + '</p>' : '') + '<div class="task-host"></div></div>';
       var host = root.querySelector('.task-host');
@@ -198,7 +198,7 @@
   }
 
   function baselineIntro() {
-    root.innerHTML = '<div class="container narrow"><p class="eyebrow">' + esc(st.participant) + ' · part 1</p>' +
+    root.innerHTML = '<div class="page"><p class="stepper-label">' + esc(st.participant) + ', part 1</p>' +
       '<h1>Baseline — just be yourself</h1>' +
       '<p class="lead">Five short tasks with your usual hand and full attention. About 3 minutes.</p>' +
       '<button class="btn primary big full" id="go">Start the baseline</button></div>';
@@ -228,11 +228,11 @@
   function conditionIntro(id) {
     var c = CONDITIONS[id];
     var n = st.idx + 1, total = st.plan.length;
-    root.innerHTML = '<div class="container narrow"><p class="eyebrow">' + esc(st.participant) + ' · round ' + n + ' of ' + total + '</p>' +
+    root.innerHTML = '<div class="page"><p class="stepper-label">' + esc(st.participant) + ', round ' + n + ' of ' + total + '</p>' +
       '<h1>' + esc(c.label) + '</h1>' +
-      '<div class="card"><p>' + esc(c.how) + '</p>' +
+      '<div class="section"><p>' + esc(c.how) + '</p>' +
       (c.standIn ? '<p class="small muted">This is a safe stand-in for impairment. It is not the same as being drunk.</p>' : '') + '</div>' +
-      (id === 'd_tired' ? '<form class="card form" id="self"><label class="field"><span>How tired are you right now?</span><select name="tired">' +
+      (id === 'd_tired' ? '<form class="panel" id="self"><label class="field"><span>How tired are you right now?</span><select name="tired">' +
         '<option value="">Choose…</option><option value="1">1 — wide awake</option><option value="2">2</option><option value="3">3 — a bit tired</option><option value="4">4</option><option value="5">5 — exhausted</option></select></label>' +
         '<p class="form-error" role="alert"></p></form>' : '') +
       '<button class="btn primary big full" id="go">Start this round (about 2 minutes)</button></div>';
@@ -293,14 +293,14 @@
   function finish() {
     st.done = true;
     save();
-    root.innerHTML = '<div class="container narrow"><div class="done-mark" aria-hidden="true">✓</div>' +
+    root.innerHTML = '<div class="page"><div data-level="ok">' + window.SLIcons.eye({ level: 'ok', className: 'done-mark' }) + '</div>' +
       '<h1>Thank you, ' + esc(st.participant) + '!</h1>' +
       '<p class="lead">Download your file and send it to the organiser. It contains numbers only — no words, no name.</p>' +
-      '<div class="card"><h2>Your rounds</h2><ul class="bars">' + st.conditions.map(function (c) {
-        return '<li><div class="bar-top"><span>' + esc(c.label) + '</span><span class="muted">quick check ' + (c.test.score == null ? '—' : c.test.score) + ' · message ' + (c.chat.score == null ? '—' : c.chat.score) + '</span></div></li>';
+      '<div class="section"><h2>Your rounds</h2><ul class="bars">' + st.conditions.map(function (c) {
+        return '<li><div class="bar-top"><span>' + esc(c.label) + '</span><span class="muted">quick check ' + (c.test.score == null ? '—' : c.test.score) + ', message ' + (c.chat.score == null ? '—' : c.chat.score) + '</span></div></li>';
       }).join('') + '</ul><p class="small muted">Scores are 0–100: how different each round looked from your baseline.</p></div>' +
       '<button class="btn primary big full" id="dl">Download my file</button>' +
-      '<button class="btn ghost full" id="new">Next participant (clears this session)</button></div>';
+      '<button class="btn secondary full" id="new">Next participant (clears this session)</button></div>';
     $('#dl').addEventListener('click', download);
     $('#new').addEventListener('click', function () {
       if (!confirm('Did you download the file? This clears the session from this browser.')) return;

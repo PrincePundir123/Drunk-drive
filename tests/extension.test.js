@@ -9,7 +9,7 @@ const SEL = require('../extension/src/selectors.js');
 const SH = require('../js/share.js');
 const R = require('../js/rides.js');
 const M = require('../js/metrics.js');
-const { SHARED } = require('../scripts/sync-extension.js');
+const { SHARED, ASSETS } = require('../scripts/sync-extension.js');
 
 test('extension/lib copies are identical to js/ (run `npm run build:ext` if this fails)', () => {
   for (const f of SHARED) {
@@ -18,6 +18,9 @@ test('extension/lib copies are identical to js/ (run `npm run build:ext` if this
     const a = fs.readFileSync(src);
     const b = fs.readFileSync(path.join(ROOT, 'extension', 'lib', f));
     assert.ok(a.equals(b), f + ' is out of date in extension/lib');
+  }
+  for (const [from, to] of ASSETS) {
+    assert.ok(fs.readFileSync(path.join(ROOT, from)).equals(fs.readFileSync(path.join(ROOT, to))), to + ' is out of date');
   }
 });
 

@@ -6,7 +6,9 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
-const SHARED = ['metrics.js', 'words.js', 'share.js', 'rides.js'];
+const SHARED = ['metrics.js', 'words.js', 'share.js', 'rides.js', 'icons.js'];
+// Design tokens and fonts, so the popup looks like the same product.
+const ASSETS = [['css/tokens.css', 'extension/lib/tokens.css'], ['assets/fonts/atkinson-hyperlegible-400.woff2', 'extension/assets/fonts/atkinson-hyperlegible-400.woff2'], ['assets/fonts/atkinson-hyperlegible-700.woff2', 'extension/assets/fonts/atkinson-hyperlegible-700.woff2'], ['assets/fonts/bricolage-grotesque-var.woff2', 'extension/assets/fonts/bricolage-grotesque-var.woff2']];
 const DEST = path.join(ROOT, 'extension', 'lib');
 
 function sync() {
@@ -18,6 +20,11 @@ function sync() {
     fs.copyFileSync(src, path.join(DEST, f));
     copied.push(f);
   }
+  for (const [from, to] of ASSETS) {
+    fs.mkdirSync(path.dirname(path.join(ROOT, to)), { recursive: true });
+    fs.copyFileSync(path.join(ROOT, from), path.join(ROOT, to));
+    copied.push(path.basename(to));
+  }
   return copied;
 }
 
@@ -26,4 +33,4 @@ if (require.main === module) {
   console.log('Synced into extension/lib: ' + copied.join(', '));
 }
 
-module.exports = { SHARED, DEST, sync };
+module.exports = { SHARED, ASSETS, DEST, sync };

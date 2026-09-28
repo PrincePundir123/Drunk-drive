@@ -4,7 +4,8 @@
 (function () {
   'use strict';
 
-  var SEC = window.SLSecure, RL = window.SLRelay, R = window.SLRides;
+  var SEC = window.SLSecure, RL = window.SLRelay, R = window.SLRides, I = window.SLIcons;
+  function ico(n) { return I.icon(n); }
   var STORE = 'secondlook.contact.v1';
   var MAX_AGE = 12 * 3600e3;
   var memory = {};
@@ -48,12 +49,12 @@
   function renderBanner() {
     var html = '';
     if (state.conn === 'offline' || (state.conn === 'reconnecting' && !navigator.onLine)) {
-      html = '<div class="card warn">You’re offline, so new alerts can’t arrive here. If ' + esc(name()) + ' needs you, they can still reach you by SMS, WhatsApp or a call.</div>';
+      html = '<div class="warn">You’re offline, so new alerts can’t arrive here. If ' + esc(name()) + ' needs you, they can still reach you by SMS, WhatsApp or a call.</div>';
     } else if (state.conn === 'reconnecting') {
-      html = '<div class="card warn">Can’t reach the alert service right now — retrying. Their SMS/WhatsApp fallback still works.</div>';
+      html = '<div class="warn">Can’t reach the alert service right now. Retrying. Their SMS/WhatsApp fallback still works.</div>';
     }
     if (state.decryptFailed) {
-      html += '<div class="card warn">An alert arrived but couldn’t be unlocked on this device. Ask ' + esc(name()) + ' to share their SecondLook link with you again.</div>';
+      html += '<div class="warn">An alert arrived but couldn’t be unlocked on this device. Ask ' + esc(name()) + ' to share their SecondLook link with you again.</div>';
     }
     $('banner').innerHTML = html;
   }
@@ -77,7 +78,7 @@
     var c = $('content');
     if (!link) {
       c.innerHTML = '<h1>Safe contact</h1>' +
-        '<div class="card"><p>This page needs the private link your friend sent you from SecondLook — the one that ends with a long code after <code>#k=</code>.</p>' +
+        '<div class="panel"><p>This page needs the private link your friend sent you from SecondLook — the one that ends with a long code after <code>#k=</code>.</p>' +
         '<p class="muted">If you opened this from a notification, open their original link once on this device first. It stores a private key here so future alerts can be unlocked.</p></div>';
       return;
     }
@@ -86,52 +87,52 @@
     if (a) {
       var isTest = a.status === 'test';
       var loc = typeof a.loc === 'string' && /^https:\/\/maps\.google\.com\/\?q=-?\d+(\.\d+)?,-?\d+(\.\d+)?$/.test(a.loc) ? a.loc : '';
-      html += '<section class="alert-card card ' + (isTest ? 'test' : 'urgent') + '">' +
-        '<p class="eyebrow">' + (isTest ? 'Test alert' : 'Alert') + ' · ' + esc(fmtTime(a.at)) + '</p>' +
+      html += '<section class="alert-card ' + (isTest ? 'test' : 'urgent') + '">' +
+        '<p class="small muted">' + (isTest ? 'Test alert' : 'Alert') + ' at ' + esc(fmtTime(a.at)) + '</p>' +
         '<h1>' + (isTest ? esc(a.name) + ' sent a test' : esc(a.name) + ' may need help') + '</h1>' +
         '<p>' + reasonLine(a) + '</p>' +
-        (loc ? '<p><a class="btn secondary" href="' + esc(loc) + '" target="_blank" rel="noopener">📍 Open their location</a></p>' : (isTest ? '' : '<p class="small muted">They chose not to share their location.</p>')) +
+        (loc ? '<p><a class="btn secondary" href="' + esc(loc) + '" target="_blank" rel="noopener">' + ico('pin') + 'Open their location</a></p>' : (isTest ? '' : '<p class="small muted">They chose not to share their location.</p>')) +
         '</section>';
       if (!isTest) {
         var phone = a.phone ? R.telUrl(a.phone) : '';
-        html += '<section class="card"><h2>Let ' + esc(a.name) + ' know you’re on it</h2>' +
+        html += '<section class="section"><h2>Let ' + esc(a.name) + ' know you’re on it</h2>' +
           '<p class="small muted">Your answer shows up on their screen right away.</p>' +
-          '<div class="ci-actions">' +
-            (phone ? '<a class="btn primary big" href="' + esc(phone) + '" data-reply="calling">📞 I’m calling now</a>'
-                   : '<button type="button" class="btn primary big" data-reply="calling">📞 I’m calling now</button>') +
-            '<button type="button" class="btn secondary big" data-reply="on_my_way">🚗 I’m on my way</button>' +
-            '<button type="button" class="btn secondary big" data-reply="booking_cab">🚕 Can’t come – book them a cab</button>' +
+          '<div class="stack">' +
+            (phone ? '<a class="btn primary big" href="' + esc(phone) + '" data-reply="calling">' + ico('phone') + 'I’m calling now</a>'
+                   : '<button type="button" class="btn primary big" data-reply="calling">' + ico('phone') + 'I’m calling now</button>') +
+            '<button type="button" class="btn secondary big" data-reply="on_my_way">' + ico('car') + 'I’m on my way</button>' +
+            '<button type="button" class="btn secondary big" data-reply="booking_cab">Can’t come: book them a cab</button>' +
           '</div>' +
           (state.showRides ? '<div class="help-inline">' + rideList(a) + '</div>' : '') +
           (state.sent ? '<p class="sent" role="status">' + esc(state.sent) + '</p>' : '') +
           (!phone ? '<p class="small muted">They didn’t add a phone number to SecondLook — use your own contacts to call them.</p>' : '') +
           '</section>' +
-          '<section class="card"><h2>Emergency</h2>' +
+          '<section class="section"><h2>Emergency</h2>' +
           (state.confirm112
-            ? '<p>Call <b>112</b> now? Use this only if you think they’re in danger.</p><div class="row-btns"><a class="btn danger big" href="' + esc(R.emergencyUrl()) + '" data-e="call">Yes, call 112</a><button type="button" class="btn ghost" data-e="cancel">Cancel</button></div>'
-            : '<button type="button" class="btn danger" data-e="ask">🆘 Call 112</button>') +
+            ? '<p>Call <b>112</b> now? Use this only if you think they’re in danger.</p><div class="btn-row"><a class="btn danger big" href="' + esc(R.emergencyUrl()) + '" data-e="call">Yes, call 112</a><button type="button" class="btn secondary" data-e="cancel">Cancel</button></div>'
+            : '<button type="button" class="btn danger" data-e="ask">' + ico('alert') + 'Call 112</button>') +
           '</section>';
       }
     } else {
-      html += '<h1>You’re ' + esc(name()) + '’s safe contact 💙</h1>' +
-        '<div class="card"><p>No alerts right now. If ' + esc(name()) + ' doesn’t respond to a SecondLook check-in, you’ll see it here.</p>' +
+      html += '<h1>You’re ' + esc(name()) + '’s safe contact</h1>' +
+        '<div class="panel"><p>No alerts right now. If ' + esc(name()) + ' doesn’t respond to a SecondLook check-in, you’ll see it here.</p>' +
         '<p class="small muted">Keep this page open, or turn on notifications below so you hear about it even when it’s closed.</p></div>';
     }
     if (state.statuses.length) {
-      html += '<section class="card"><h2>From ' + esc(name()) + '</h2><ul class="updates">' + state.statuses.slice(-5).reverse().map(function (s) {
+      html += '<section class="section"><h2>From ' + esc(name()) + '</h2><ul class="updates">' + state.statuses.slice(-5).reverse().map(function (s) {
         return '<li>' + esc(s.text) + ' <time>' + esc(fmtTime(s.at)) + '</time></li>';
       }).join('') + '</ul></section>';
     }
     if (state.replies.length) {
       html += '<p class="small muted">Your last answer: ' + esc(replyWord(state.replies[state.replies.length - 1].action)) + ' · ' + esc(fmtTime(state.replies[state.replies.length - 1].at)) + '</p>';
     }
-    html += '<section class="card"><h2>Get a notification when it matters</h2>' +
+    html += '<section class="section"><h2>Get a notification when it matters</h2>' +
       '<ol class="steps-list">' +
         '<li>Install the free <b>ntfy</b> app (<a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank" rel="noopener">Android</a> · <a href="https://apps.apple.com/app/ntfy/id1625396347" target="_blank" rel="noopener">iPhone</a>).</li>' +
         '<li>Subscribe to this private topic: <code class="topic">' + esc(link.a) + '</code> <button type="button" class="linkish" data-copy-topic>Copy</button></li>' +
       '</ol>' +
-      '<div class="row-btns"><a class="btn secondary" href="ntfy://ntfy.sh/' + esc(link.a) + '">Open in ntfy app</a>' +
-      '<a class="btn ghost" href="https://ntfy.sh/' + esc(link.a) + '" target="_blank" rel="noopener">Use ntfy in the browser</a></div>' +
+      '<div class="btn-row"><a class="btn secondary" href="ntfy://ntfy.sh/' + esc(link.a) + '">Open in ntfy app</a>' +
+      '<a class="btn secondary" href="https://ntfy.sh/' + esc(link.a) + '" target="_blank" rel="noopener">Use ntfy in the browser</a></div>' +
       '<p class="small muted">The notification only says “' + esc(name()) + ' may need help – tap to open”. The details are encrypted and only unlock on this page.</p>' +
       '</section>';
     c.innerHTML = html;

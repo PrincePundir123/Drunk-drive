@@ -3,34 +3,37 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0a0f1f">
+  <meta name="theme-color" content="#111317">
   <meta name="referrer" content="no-referrer">
   <meta name="robots" content="noindex">
   <title>SecondLook — safe contact</title>
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/atkinson-hyperlegible-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="contact-page">
+<body class="contact-page" data-mode="night">
   <header class="topbar">
-    <span class="brand"><img src="assets/icon.svg" alt="" width="28" height="28"><span>SecondLook</span></span>
+    <span class="brand"><svg class="eye" viewBox="0 0 120 76" data-level="ok" aria-hidden="true" focusable="false"><defs><clipPath id="eyeclip-brand"><path d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z"/></clipPath></defs><path class="eye-shape" d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z"/><g clip-path="url(#eyeclip1)"><circle class="eye-track" cx="60" cy="38" r="19"/><circle class="eye-iris" cx="60" cy="38" r="19" stroke-dasharray="119.38" stroke-dashoffset="0.00" transform="rotate(-90 60 38)"/><circle class="eye-pupil" cx="60" cy="38" r="10"/><rect class="eye-bar" x="55.5" y="33" width="3" height="10" rx="1.5"/><rect class="eye-bar" x="61.5" y="33" width="3" height="10" rx="1.5"/></g><path class="eye-outline" d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z"/></svg><span>SecondLook</span></span>
     <span class="conn" id="conn" aria-live="polite"></span>
   </header>
-  <main id="app" class="container narrow">
+  <main id="app" class="page">
     <div id="banner" role="status" aria-live="polite"></div>
     <div id="live" class="sr-only" aria-live="assertive"></div>
     <div id="content"><p class="muted">Loading…</p></div>
-    <details class="card explainer">
-      <summary><b>What is this?</b></summary>
+    <details class="more explainer section">
+      <summary>What is this?</summary><div class="more-body">
       <p>Someone you care about uses <b>SecondLook</b>, an app that notices when their texting looks very different from how they normally type — for example late on a night out — and gently checks in with them.</p>
       <p>While they were <b>sober</b>, they chose <b>you</b> as their safe contact and agreed that if they don’t answer a check-in, you get a heads-up. That’s all this page is for.</p>
-      <ul class="ticks">
+      <ul>
         <li>You’ll only hear something if they didn’t respond to a check-in, or when they send a test.</li>
         <li>Details are <b>end-to-end encrypted</b>: the notification only says they may need help; the rest unlocks on this page with a key that never leaves the link they sent you.</li>
         <li>You can’t see their messages, and you can’t track them. Location is included only if they chose to share it.</li>
         <li>If you think they’re in danger, call your local emergency number.</li>
       </ul>
-    </details>
+    </div></details>
   </main>
+  <script src="js/icons.js"></script>
   <script src="js/rides.js"></script>
   <script src="js/secure.js"></script>
   <script src="js/relay.js"></script>

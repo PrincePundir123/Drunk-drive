@@ -3,32 +3,40 @@
 (function (root) {
   'use strict';
 
+  // Night Mode values from css/tokens.css, inlined: a closed shadow root on someone
+  // else's site can't load our stylesheet. Keep these in sync with the tokens.
   var CSS = [
     ':host{all:initial}',
     '*{box-sizing:border-box}',
-    '.backdrop{position:fixed;inset:0;background:rgba(3,6,15,.72);display:flex;align-items:center;justify-content:center;padding:16px;font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#e8edf8;z-index:2147483647}',
-    '.card{width:100%;max-width:420px;max-height:calc(100vh - 32px);overflow:auto;background:#131b31;border:1px solid #26314f;border-radius:20px;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,.5);text-align:center;animation:rise .18s ease}',
-    '.icon{font-size:36px;line-height:1}',
-    'h2{font-size:20px;margin:10px 0 6px;color:#e8edf8}',
-    'p{margin:0 0 12px;color:#9ca8c6}',
-    '.brand{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#6ee7c8;font-weight:700}',
-    'ul{list-style:none;margin:0 0 12px;padding:10px 14px;background:#0e1528;border-radius:12px;text-align:left;color:#c9d2e8}',
-    'li{padding:2px 0}',
-    '.plan{text-align:left;background:#0e1528;border:1px solid #3a4870;border-radius:12px;padding:10px 14px;margin:0 0 12px;color:#e8edf8}',
-    '.plan q{display:block;color:#fbbf24;margin-top:4px}',
-    '.stack{display:grid;gap:10px;margin-top:6px}',
-    'button,a.btn{all:unset;box-sizing:border-box;display:flex;align-items:center;justify-content:center;min-height:46px;padding:10px 16px;border-radius:12px;font-weight:600;cursor:pointer;text-align:center;border:1px solid #26314f;background:#19233f;color:#e8edf8}',
-    'button.primary{background:#6ee7c8;color:#03261e;border-color:#6ee7c8}',
-    'button.ghost{background:transparent;color:#c9d2e8}',
-    'button:focus-visible,a.btn:focus-visible{outline:3px solid #a5b4fc;outline-offset:2px}',
-    '.rides{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 10px}',
-    '.rides a.btn{min-height:40px;padding:8px 12px;font-size:14px}',
-    '.bar{height:4px;background:#26314f;border-radius:4px;overflow:hidden;margin-top:14px}',
-    '.bar span{display:block;height:100%;background:#fbbf24;width:100%}',
-    '.foot{font-size:12px;color:#9ca8c6;margin:8px 0 0}',
+    '.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;font:20px/1.45 "Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;color:#F4EFE6;z-index:2147483647}',
+    '.card{width:100%;max-width:520px;max-height:calc(100vh - 24px);overflow:auto;background:#111317;border-radius:22px 22px 0 0;padding:12px 24px 24px;box-shadow:0 -12px 40px rgba(0,0,0,.45);text-align:left;animation:up .42s cubic-bezier(.2,.8,.2,1)}',
+    '@media (min-width:600px){.card{margin-bottom:24px;border-radius:22px}}',
+    '.grip{width:44px;height:5px;border-radius:999px;background:#3A3F4A;margin:0 auto 16px}',
+    '.brand{display:flex;align-items:center;gap:8px;font-size:16px;color:#C9C1B3;margin-bottom:8px}',
+    '.eye{width:72px;height:46px;margin:4px 0 12px}',
+    '.eye .eye-shape{fill:#1B1E24}.eye .eye-outline{fill:none;stroke:#F4EFE6;stroke-width:3}.eye .eye-track{fill:none;stroke:#3A3F4A;stroke-width:5}',
+    '.eye .eye-iris{fill:none;stroke:#FFBE55;stroke-width:5;stroke-linecap:round}.eye .eye-pupil{fill:#FFBE55}.eye .eye-bar{fill:#1B1E24}',
+    '.brand .eye{width:28px;height:18px;margin:0}',
+    'h2{font-size:32px;line-height:1.15;margin:0 0 8px;color:#F4EFE6;font-weight:700}',
+    'p{margin:0 0 16px;color:#C9C1B3}',
+    'ul{list-style:none;margin:0 0 16px;padding:0;color:#C9C1B3;display:grid;gap:4px}',
+    'li::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#FFBE55;margin-right:8px;vertical-align:middle}',
+    '.plan{background:rgba(255,190,85,.14);border:2px solid #FFBE55;border-radius:14px;padding:12px 16px;margin:0 0 16px;color:#F4EFE6;font-weight:700}',
+    '.plan q{display:block;font-weight:400;margin-top:6px;quotes:"\\201C" "\\201D"}',
+    '.stack{display:grid;gap:12px;margin-top:8px}',
+    'button,a.btn{all:unset;box-sizing:border-box;display:flex;align-items:center;justify-content:center;min-height:56px;padding:8px 24px;border-radius:999px;font-weight:700;font-size:20px;cursor:pointer;text-align:center;border:2px solid #3A3F4A;background:#1B1E24;color:#F4EFE6}',
+    'button.primary{background:#FFBE55;color:#1A1204;border-color:#FFBE55;min-height:64px;font-size:24px}',
+    'button.quiet{background:transparent;border-color:transparent;color:#FFBE55;text-decoration:underline;text-underline-offset:4px}',
+    'button:focus-visible,a.btn:focus-visible{outline:3px solid #FFBE55;outline-offset:3px}',
+    '.rides{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}',
+    '.rides a.btn{min-height:48px;padding:8px 16px;font-size:18px}',
+    '.count p{margin:0 0 8px}',
+    '.count b{color:#F4EFE6}',
+    '.bar{height:8px;background:#262A32;border-radius:999px;overflow:hidden;margin-bottom:16px}',
+    '.bar span{display:block;height:100%;background:#FFBE55;width:100%;border-radius:inherit;transition:width .25s linear}',
     '.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}',
-    '.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#e8edf8;color:#0a0f1f;font:600 14px/1.4 system-ui,sans-serif;padding:10px 16px;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:2147483647;max-width:calc(100vw - 32px)}',
-    '@keyframes rise{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}',
+    '.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#F4EFE6;color:#111317;font:700 16px/1.4 "Atkinson Hyperlegible",system-ui,sans-serif;padding:12px 20px;border-radius:999px;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:2147483647;max-width:calc(100vw - 32px)}',
+    '@keyframes up{from{transform:translateY(100%)}to{transform:none}}',
     '@media (prefers-reduced-motion:reduce){.card{animation:none}.bar span{transition:none}}'
   ].join('\n');
 
@@ -62,22 +70,23 @@
     var rides = (opts.rides || []).map(function (r, i) {
       return '<a class="btn" href="' + esc(r.url) + '" target="_blank" rel="noopener" data-ride="' + i + '">' + esc(r.name) + '</a>';
     }).join('');
+    var eye = function (level) { return root.SLIcons ? root.SLIcons.eye({ level: level }) : ''; };
     m.shadow.innerHTML = '<style>' + CSS + '</style>' +
       '<div class="backdrop"><div class="card" role="dialog" aria-modal="true" aria-labelledby="t" aria-describedby="d">' +
-        '<div class="brand">SecondLook</div>' +
-        '<div class="icon" aria-hidden="true">👀</div>' +
+        '<div class="grip" aria-hidden="true"></div>' +
+        '<div class="brand">' + eye('ok') + 'SecondLook</div>' +
+        eye('count') +
         '<h2 id="t">Want a second look?</h2>' +
-        '<p id="d">This looks a little different from how you usually text.</p>' +
-        (opts.reasons && opts.reasons.length ? '<ul aria-label="What’s different">' + opts.reasons.map(function (r) { return '<li>• ' + esc(r) + '</li>'; }).join('') + '</ul>' : '') +
+        '<p id="d">This doesn’t look like how you usually text.</p>' +
+        (opts.reasons && opts.reasons.length ? '<ul aria-label="What’s different">' + opts.reasons.slice(0, 2).map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>' : '') +
         (opts.plan ? '<div class="plan">' + esc(opts.plan.text) + (opts.plan.note ? '<q>' + esc(opts.plan.note) + '</q>' : '') + '</div>' : '') +
-        (rides ? '<p>Get a ride home:</p><div class="rides">' + rides + '</div>' : '') +
+        (rides ? '<p>Book a ride home:</p><div class="rides">' + rides + '</div>' : '') +
+        '<div class="count"><p>Checking in with you in <b data-secs>' + secs + '</b> seconds.</p><div class="bar" aria-hidden="true"><span></span></div></div>' +
         '<div class="stack">' +
-          '<button type="button" class="primary" data-a="edit">Edit message</button>' +
-          '<button type="button" data-a="send">Send anyway</button>' +
-          '<button type="button" class="ghost" data-a="check">Check how I’m doing (1 min)</button>' +
+          '<button type="button" class="primary" data-a="edit">Edit my message</button>' +
+          '<button type="button" data-a="send">Send it anyway</button>' +
+          '<button type="button" class="quiet" data-a="check">Check how I’m doing</button>' +
         '</div>' +
-        '<div class="bar" aria-hidden="true"><span></span></div>' +
-        '<p class="foot">If there’s no answer in <b data-secs>' + secs + '</b>s, SecondLook will check in with you.</p>' +
         '<div class="sr" aria-live="polite" data-live></div>' +
       '</div></div>';
 

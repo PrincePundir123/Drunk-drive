@@ -5,7 +5,7 @@
   var SH = self.SLShare;
   var LOCK_WINDOW = 6 * 3600e3;
   // Must match manifest.json content_scripts[0].js
-  var CONTENT_FILES = ['lib/words.js', 'lib/metrics.js', 'lib/rides.js', 'src/selectors.js', 'src/overlay.js', 'src/content.js'];
+  var CONTENT_FILES = ['lib/words.js',  'lib/metrics.js',  'lib/rides.js',  'src/selectors.js',  'lib/icons.js',  'src/overlay.js',  'src/content.js'];
   var BUILTIN = [
     { id: 'whatsapp', label: 'WhatsApp Web', hosts: ['web.whatsapp.com'] },
     { id: 'instagram', label: 'Instagram DMs', hosts: ['www.instagram.com', 'instagram.com'] },
