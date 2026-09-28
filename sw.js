@@ -1,8 +1,9 @@
 /* SecondLook service worker: network first, cache as offline fallback. */
-var CACHE = 'secondlook-v1';
+var CACHE = 'secondlook-v2';
 var ASSETS = [
   './', './index.html', './css/style.css', './manifest.webmanifest', './assets/icon.svg',
-  './js/storage.js', './js/words.js', './js/metrics.js', './js/tests.js', './js/app.js'
+  './js/storage.js', './js/words.js', './js/metrics.js', './js/share.js', './js/rides.js', './js/tests.js', './js/app.js',
+  './assets/icon-192.png', './assets/icon-512.png'
 ];
 
 self.addEventListener('install', function (e) {

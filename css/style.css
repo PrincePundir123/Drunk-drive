@@ -306,6 +306,12 @@ fieldset:disabled input, fieldset:disabled select { opacity: .55; }
 .alert-text { margin: 0 0 12px; padding: 14px; background: var(--card); border: 1px solid rgba(251, 113, 133, .4); border-radius: 14px; color: var(--text); overflow-wrap: anywhere; }
 .help-inline { text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 4px 16px 16px; margin: 14px 0; }
 
+textarea.code { font: 12px/1.4 ui-monospace, Consolas, monospace; word-break: break-all; }
+.file-btn { position: relative; overflow: hidden; }
+.file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.file-btn:focus-within { outline: 3px solid var(--accent-2); outline-offset: 2px; }
+code { font-family: ui-monospace, Consolas, monospace; font-size: .9em; }
+
 /* ---------- log ---------- */
 .log { list-style: none; padding: 0; margin: 14px 0; display: grid; gap: 8px; }
 .log li { display: flex; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }

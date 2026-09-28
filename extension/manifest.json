@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "SecondLook",
+  "version": "1.0.0",
+  "description": "A gentle second look before you send a message that doesn't look like you — on WhatsApp Web, Instagram DMs and Gmail.",
+  "minimum_chrome_version": "111",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "SecondLook",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "permissions": ["storage", "scripting", "activeTab"],
+  "optional_host_permissions": ["https://*/*", "http://*/*"],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://web.whatsapp.com/*",
+        "https://www.instagram.com/*",
+        "https://mail.google.com/*"
+      ],
+      "js": [
+        "lib/words.js",
+        "lib/metrics.js",
+        "lib/rides.js",
+        "src/selectors.js",
+        "src/overlay.js",
+        "src/content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

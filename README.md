@@ -35,6 +35,28 @@ npm test           # unit tests for the scoring logic
 
 **Deploy for free:** push to GitHub → *Settings → Pages → Deploy from branch → main / root*. It's all static files, so there's no build step.
 
+## Install the browser extension (WhatsApp Web, Instagram DMs, Gmail)
+
+The extension gives the same second look where people actually text. It runs in Chrome and Edge.
+
+1. Open the web app over http(s): run `npm start` (→ http://localhost:5173) or use your GitHub Pages link, then finish setup and calibration.
+2. Go to **Settings → Use it in WhatsApp, Instagram & Gmail → Show my extension code** and copy the code. It contains timing numbers and settings, never messages.
+3. In Chrome, open `chrome://extensions` (in Edge, `edge://extensions`), turn on **Developer mode**, click **Load unpacked** and choose the `extension/` folder.
+4. Click the SecondLook icon in the toolbar, paste the code and press **Import**.
+5. **Reload** any open WhatsApp Web, Instagram or Gmail tabs.
+6. Optional: on any other site, open the popup and tick **Also use on <site>**. SecondLook asks for permission for that one site only; there's no `<all_urls>` access.
+
+How it behaves:
+- It records keystroke **timing and counts only**. When you press send, it reads the text once, in memory, to count misspelled words, then throws it away.
+- If the message looks unlike you, it holds it back and shows the prompt inside a closed Shadow DOM. **Send anyway** really sends: it clicks the site's own send button, with a synthetic Enter as the fallback.
+- If you ignore the prompt, or several messages are flagged, it opens the web app's check-in in a new tab, and the normal check-in and alert flow takes over.
+- If anything goes wrong inside the extension, your message sends normally (fail open).
+- Every action is written to the popup's log. Use **Copy log for the web app**, then **Log → Import extension log** in the web app, to keep one downloadable record.
+- All site selectors are in [`extension/src/selectors.js`](extension/src/selectors.js). WhatsApp and Instagram change their markup often, so that's the one file to update when a site breaks.
+- Shared logic is **not duplicated**: `npm run build:ext` copies `js/metrics.js`, `js/words.js`, `js/share.js` and `js/rides.js` into `extension/lib/`, and `npm test` fails if the copies are stale.
+
+> A full product would be a **mobile keyboard** (an Android IME or an iOS keyboard extension), so it works in every messaging app on the phone where people actually text late at night. The browser extension is the closest honest version we can build and demo on the web.
+
 ## How the scoring works
 
 Each signal is converted to a z-score against your own baseline:

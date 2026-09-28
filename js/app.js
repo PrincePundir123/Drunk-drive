@@ -7,6 +7,7 @@
   var M = window.SLMetrics;
   var T = window.SLTests;
   var S = window.SLStore;
+  var SH = window.SLShare;
   var DICT = new Set(String(window.SL_WORDS || '').split(/\s+/).filter(Boolean));
 
   var HOUR = 3600e3;
@@ -185,10 +186,20 @@
     if (!p) { if (v !== 'setup') v = 'welcome'; }
     else if (!b) { if (['calibrate', 'settings', 'log'].indexOf(v) < 0) v = 'calibrate'; }
     else if (VIEWS.indexOf(v) < 0 || v === 'welcome' || v === 'setup') v = 'home';
+    var extReason = EXT_REASONS[new URLSearchParams(location.hash.split('?')[1] || '').get('checkin')];
     if (location.hash !== '#/' + v) history.replaceState(null, '', '#/' + v);
     currentView = v;
     renderView(true);
+    if (extReason && p && b) {
+      log('checkin', 'The browser extension opened SecondLook to check in with you.');
+      startCheckin(extReason);
+    }
   }
+  var EXT_REASONS = {
+    'ext-ignored': 'You didn’t respond to a second-look prompt in the browser extension.',
+    'ext-repeated': 'Several messages in the browser extension looked different from your usual.',
+    'ext-strong': 'A message in the browser extension looked very different from your usual.'
+  };
   function renderView(moveFocus) {
     if (viewCleanup) { try { viewCleanup(); } catch (e) { /* ignore */ } viewCleanup = null; }
     var v = currentView;
@@ -1009,14 +1020,14 @@
   // ======================================================================
   // view: transparency log
   // ======================================================================
-  var LOG_ICONS = { setup: '📝', baseline: '📏', nudge: '👀', checkin: '💙', alert: '📣', check: '🩺', settings: '🔒', ride: '🚗', contact: '💬', data: '🗂️', action: '•' };
+  var LOG_ICONS = { extension: '🧩', setup: '📝', baseline: '📏', nudge: '👀', checkin: '💙', alert: '📣', check: '🩺', settings: '🔒', ride: '🚗', contact: '💬', data: '🗂️', action: '•' };
 
   function renderLog(root) {
     var entries = S.get('log', []);
     root.innerHTML = '<div class="container">' +
       '<h1>Transparency log</h1>' +
       '<p class="lead">Everything SecondLook does is written here, in plain words. Nothing happens behind your back.</p>' +
-      '<div class="row-btns"><button class="btn secondary" id="log-dl">Download my log</button><button class="btn ghost" id="log-clear">Clear log</button></div>' +
+      '<div class="row-btns"><button class="btn secondary" id="log-dl">Download my log</button><button class="btn secondary" id="log-import">Import extension log</button><button class="btn ghost" id="log-clear">Clear log</button></div>' +
       (entries.length ? '<ol class="log">' + entries.map(function (e) {
         return '<li><span class="log-ico" aria-hidden="true">' + (LOG_ICONS[e.type] || '•') + '</span><div><p>' + esc(e.text) + '</p><time datetime="' + new Date(e.at).toISOString() + '">' + esc(fmtDate(e.at)) + '</time></div></li>';
       }).join('') + '</ol>' : '<p class="muted">Nothing yet.</p>') +
@@ -1026,20 +1037,47 @@
         '<li>The only thing that can ever leave your device is an alert <b>you agreed to</b> in advance.</li>' +
         '<li>Safety settings lock for a few hours after something is flagged, so an impaired you can’t quietly undo a sober decision.</li>' +
       '</ul></section></div>';
-    $('#log-dl', root).addEventListener('click', function () {
-      var blob = new Blob([JSON.stringify(S.get('log', []), null, 2)], { type: 'application/json' });
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'secondlook-log.json';
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
-    });
+    $('#log-dl', root).addEventListener('click', function () { downloadJson(S.get('log', []), 'secondlook-log.json'); });
+    $('#log-import', root).addEventListener('click', openLogImport);
     $('#log-clear', root).addEventListener('click', function () {
       if (isLocked()) { openUnlock(function () { renderView(false); }); return; }
       if (!confirm('Clear the whole log?')) return;
       S.set('log', []);
       log('data', 'You cleared the log.');
     });
+  }
+
+  function downloadJson(obj, name) {
+    var blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  }
+
+  function openLogImport() {
+    var m = openModal('<h2>Import extension log</h2>' +
+      '<p class="muted">In the extension popup, tap <b>Copy log for the web app</b> and paste it here — or choose the downloaded file. Entries are added to this log so you have one complete record.</p>' +
+      '<label class="sr-only" for="log-code">Extension log code</label><textarea id="log-code" class="code" rows="4" placeholder="SLL1…"></textarea>' +
+      '<p class="form-error" role="alert" id="log-import-err"></p>' +
+      '<div class="row-btns"><button type="button" class="btn primary" id="log-import-go">Import</button>' +
+      '<label class="btn ghost file-btn">Choose file<input type="file" accept=".json,application/json" id="log-file"></label>' +
+      '<button type="button" class="btn ghost" data-close>Cancel</button></div>', { label: 'Import extension log' });
+    function doImport(raw) {
+      try {
+        var res = SH.mergeLogs(S.get('log', []), SH.decodeCode(raw, SH.LOG_PREFIX), 600);
+        S.set('log', res.log);
+        m.close('done');
+        log('data', 'You imported ' + res.added + ' entries from the browser extension log.');
+        toast(res.added + ' entries imported');
+      } catch (e) {
+        $('#log-import-err', m.el).textContent = e.message || 'Couldn’t read that log.';
+      }
+    }
+    $('#log-import-go', m.el).addEventListener('click', function () { doImport($('#log-code', m.el).value); });
+    $('#log-file', m.el).addEventListener('change', function () { var f = this.files && this.files[0]; if (f) f.text().then(doImport); });
+    $('[data-close]', m.el).addEventListener('click', function () { m.close('cancel'); });
   }
 
   // ======================================================================
@@ -1106,6 +1144,13 @@
         '<p class="form-error" role="alert"></p>' +
         '<button class="btn primary big full" type="submit">Save changes</button>' +
       '</fieldset></form>' +
+      '<section class="card"><h2>Use it in WhatsApp, Instagram &amp; Gmail</h2>' +
+        '<p class="muted">The SecondLook browser extension (Chrome or Edge) gives the same second look on WhatsApp Web, Instagram DMs and Gmail. Paste this code into the extension’s popup. It holds timing numbers and your settings — never messages.</p>' +
+        '<button type="button" class="btn secondary" id="ext-export"' + (b ? '' : ' disabled') + '>Show my extension code</button>' +
+        '<div id="ext-code-wrap" hidden><label class="sr-only" for="ext-code">Extension code</label><textarea id="ext-code" class="code" rows="4" readonly></textarea>' +
+        '<div class="row-btns"><button type="button" class="btn secondary" id="ext-copy">Copy code</button><button type="button" class="btn ghost" id="ext-dl">Download file</button></div>' +
+        (location.protocol === 'file:' ? '<p class="small muted">You opened SecondLook as a local file, so the extension can’t open it for check-ins. Use <code>npm start</code> or your GitHub Pages link, then export again.</p>' : '') +
+        '</div></section>' +
       '<section class="card"><h2>Baseline</h2><p class="muted">Recalibrate if you changed phones or your baseline feels off. Do it sober.</p>' +
         '<button type="button" class="btn secondary" id="recal"' + (locked ? ' disabled' : '') + '>Recalibrate (2 min)</button></section>' +
       '<section class="card danger"><h2>Delete everything</h2><p class="muted">Removes your profile, baseline, messages and log from this browser.</p>' +
@@ -1162,6 +1207,17 @@
       renderView(false);
     });
 
+    function extData() { return SH.buildBaselineExport({ baseline: getBaseline(), profile: getProfile(), flags: getState().flags, appUrl: location.href.split('#')[0] }); }
+    $('#ext-export', root).addEventListener('click', function () {
+      $('#ext-code', root).value = SH.encodeCode(SH.BASELINE_PREFIX, extData());
+      $('#ext-code-wrap', root).hidden = false;
+      $('#ext-code', root).select();
+      log('data', 'You exported your baseline for the browser extension (timing numbers and settings only).');
+    });
+    $('#ext-copy', root).addEventListener('click', function () {
+      window.SLRides.copyText($('#ext-code', root).value).then(function (ok) { toast(ok ? 'Code copied ✓' : 'Couldn’t copy — select the code and copy it'); });
+    });
+    $('#ext-dl', root).addEventListener('click', function () { downloadJson(extData(), 'secondlook-baseline.json'); });
     $('#recal', root).addEventListener('click', function () { go('calibrate'); });
     $('#reset', root).addEventListener('click', function () {
       if (confirm('Delete everything SecondLook stored in this browser? This can’t be undone.')) resetAll();

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>SecondLook</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <img src="../icons/icon32.png" alt="" width="24" height="24">
+    <h1>SecondLook</h1>
+  </header>
+
+  <section id="status" class="status" aria-live="polite">
+    <span class="dot" aria-hidden="true"></span>
+    <div><h2 id="status-title">Loading…</h2><p id="status-text"></p></div>
+  </section>
+
+  <section id="import-card" class="card" hidden>
+    <h2>Import your baseline</h2>
+    <p class="muted">In the SecondLook web app, open <b>Settings → Use it in WhatsApp, Instagram &amp; Gmail</b> and copy your code. It holds timing numbers only, never messages.</p>
+    <label class="sr" for="import-code">Baseline code</label>
+    <textarea id="import-code" rows="3" placeholder="Paste the SLB1… code here"></textarea>
+    <div class="row">
+      <button type="button" class="primary" id="import-btn">Import</button>
+      <label class="file">or choose a file<input type="file" id="import-file" accept=".json,application/json"></label>
+    </div>
+    <p class="error" id="import-error" role="alert"></p>
+  </section>
+
+  <section id="main-card" class="card" hidden>
+    <p class="muted" id="baseline-info"></p>
+    <div class="row">
+      <button type="button" id="pause-btn">Pause for 1 hour</button>
+      <button type="button" id="open-app">Open SecondLook</button>
+    </div>
+    <p class="muted small" id="pause-note"></p>
+  </section>
+
+  <section class="card" id="sites-card">
+    <h2>Where it runs</h2>
+    <div id="sites"></div>
+    <p class="muted small">Reload a tab after installing so SecondLook can start there.</p>
+  </section>
+
+  <section class="card">
+    <h2>Recent activity</h2>
+    <ol id="log" class="log"></ol>
+    <div class="row">
+      <button type="button" id="copy-log">Copy log for the web app</button>
+      <button type="button" id="dl-log">Download</button>
+    </div>
+    <p class="muted small">Paste it in the web app under <b>Log → Import extension log</b> to keep one complete record.</p>
+  </section>
+
+  <details class="card" id="advanced">
+    <summary>Advanced</summary>
+    <label class="field" for="app-url">Web app address</label>
+    <input id="app-url" type="url" placeholder="https://you.github.io/secondlook/">
+    <div class="row">
+      <button type="button" id="save-url">Save address</button>
+      <button type="button" id="replace-baseline">Replace baseline</button>
+    </div>
+    <p class="error" id="adv-error" role="alert"></p>
+  </details>
+
+  <script src="../lib/share.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
