@@ -300,12 +300,7 @@
   // view: calibrate (sober baseline)
   // ======================================================================
   function buildBaseline(res, old) {
-    var t = {};
-    t.reactionMs = M.fromSamples(res.reaction.trials);
-    t.trackingErr = M.fromSamples([res.tracking.trackingErr]);
-    M.TYPING_KEYS.forEach(function (k) {
-      t[k] = M.fromSamples(res.typing.map(function (s) { return s[k]; }));
-    });
+    var t = M.baselineFromTasks(res);
     var chat = old && old.chat ? old.chat : {
       ikiMs: t.ikiMs.n ? t.ikiMs : M.seeded(200, 40, 2),
       ikiCv: t.ikiCv.n ? t.ikiCv : M.seeded(0.6, 0.15, 2),
@@ -709,9 +704,7 @@
       '</div>';
     $('#check-start', root).addEventListener('click', function () {
       cleanup = runTasks(root, steps, function (res) {
-        var typing = M.averageSamples(res.typing, M.TYPING_KEYS);
-        var sample = Object.assign({ reactionMs: res.reaction.reactionMs, trackingErr: res.tracking.trackingErr }, typing);
-        showResult(M.compare(sample, b.test, M.TEST_KEYS), false);
+        showResult(M.compare(M.sampleFromTasks(res), b.test, M.TEST_KEYS), false);
       });
     });
     var sim = $('#check-sim', root);

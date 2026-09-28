@@ -1,0 +1,266 @@
+// Pure analysis functions for the SecondLook validation study (no I/O, no dependencies).
+'use strict';
+
+const CONDITION_ORDER = ['a_sober', 'b_nondominant', 'c_dualtask', 'd_tired'];
+const LABELS = {
+  a_sober: 'Sober retest',
+  b_nondominant: 'Non-dominant hand (stand-in)',
+  c_dualtask: 'Dual task (stand-in)',
+  d_tired: 'Tired / late night (stand-in)'
+};
+const KINDS = { test: 'Quick check', chat: 'Message' };
+
+function isNum(v) { return typeof v === 'number' && isFinite(v); }
+
+/** Basic shape check. Returns a list of problems (empty = OK). */
+function validateParticipant(p) {
+  const errs = [];
+  if (!p || p.kind !== 'secondlook-study') errs.push('not a SecondLook study file');
+  else {
+    if (!/^P\d{2,3}$/.test(p.participant || '')) errs.push('missing participant code');
+    if (!Array.isArray(p.conditions)) errs.push('no conditions');
+    else p.conditions.forEach((c, i) => {
+      if (!LABELS[c.id]) errs.push('condition ' + i + ' has unknown id ' + c.id);
+      if (!c.test || !c.chat) errs.push('condition ' + i + ' missing scores');
+    });
+  }
+  return errs;
+}
+
+/** Group scores and z-values by condition and kind ('test' | 'chat'). */
+function collect(participants) {
+  const out = {};
+  CONDITION_ORDER.forEach(id => { out[id] = { test: { scores: [], z: {} }, chat: { scores: [], z: {} }, participants: new Set() }; });
+  participants.forEach(p => {
+    (p.conditions || []).forEach(c => {
+      const slot = out[c.id];
+      if (!slot) return;
+      slot.participants.add(p.participant);
+      ['test', 'chat'].forEach(kind => {
+        const r = c[kind];
+        if (!r) return;
+        if (isNum(r.score)) slot[kind].scores.push(r.score);
+        Object.keys(r.z || {}).forEach(k => {
+          if (!isNum(r.z[k])) return;
+          (slot[kind].z[k] = slot[kind].z[k] || []).push(r.z[k]);
+        });
+      });
+    });
+  });
+  return out;
+}
+
+/** Share of scores at or above the threshold (null when there's no data). */
+function rateAtOrAbove(scores, threshold) {
+  if (!scores || !scores.length) return null;
+  return scores.filter(s => s >= threshold).length / scores.length;
+}
+
+/** False-alarm rate: share of SOBER retests that would have been flagged. */
+function falseAlarmRate(collected, threshold, kind) {
+  return rateAtOrAbove(collected.a_sober[kind || 'test'].scores, threshold);
+}
+
+/** Detection rate for a stand-in condition. */
+function detectionRate(collected, conditionId, threshold, kind) {
+  return rateAtOrAbove(collected[conditionId][kind || 'test'].scores, threshold);
+}
+
+/** 95% Wilson score interval for k of n — honest error bars for small studies. */
+function wilson(k, n, z) {
+  if (!n) return null;
+  z = z || 1.96;
+  const p = k / n, d = 1 + z * z / n;
+  const centre = (p + z * z / (2 * n)) / d;
+  const half = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d;
+  return [Math.max(0, centre - half), Math.min(1, centre + half)];
+}
+
+function sweep(collected, kind, from, to, step) {
+  const rows = [];
+  for (let t = from; t <= to; t += step) {
+    const row = { threshold: t, falseAlarm: falseAlarmRate(collected, t, kind), detect: {} };
+    CONDITION_ORDER.slice(1).forEach(id => { row.detect[id] = detectionRate(collected, id, t, kind); });
+    rows.push(row);
+  }
+  return rows;
+}
+
+/** Area under the ROC curve (Mann–Whitney): P(stand-in value > sober value), ties count half. */
+function auc(pos, neg) {
+  if (!pos.length || !neg.length) return null;
+  let wins = 0;
+  pos.forEach(a => neg.forEach(b => { wins += a > b ? 1 : a === b ? 0.5 : 0; }));
+  return wins / (pos.length * neg.length);
+}
+
+/** Which signals best separate each stand-in from the sober retest (by AUC of z-values). */
+function signalSeparation(collected, kind) {
+  const sober = collected.a_sober[kind].z;
+  const signals = new Set(Object.keys(sober));
+  CONDITION_ORDER.slice(1).forEach(id => Object.keys(collected[id][kind].z).forEach(k => signals.add(k)));
+  const rows = [];
+  signals.forEach(sig => {
+    const row = { signal: sig, auc: {}, mean: null };
+    const vals = [];
+    CONDITION_ORDER.slice(1).forEach(id => {
+      const a = auc(collected[id][kind].z[sig] || [], sober[sig] || []);
+      row.auc[id] = a;
+      if (a != null) vals.push(a);
+    });
+    row.mean = vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null;
+    rows.push(row);
+  });
+  return rows.sort((x, y) => (y.mean == null ? -1 : y.mean) - (x.mean == null ? -1 : x.mean));
+}
+
+// ------------------------------------------------------------------ reports
+function pct(v) { return v == null ? '—' : Math.round(v * 100) + '%'; }
+function ci(k, n) { const w = wilson(k, n); return w ? ' (95% CI ' + Math.round(w[0] * 100) + '–' + Math.round(w[1] * 100) + '%)' : ''; }
+const WATERMARK = 'SYNTHETIC – not real results';
+
+function summaryMarkdown(participants, opts) {
+  opts = opts || {};
+  const c = collect(participants);
+  const L = [];
+  if (opts.synthetic) L.push('> ⚠️ **' + WATERMARK + '.** Generated by `npm run analyze -- --synthetic` only to test the pipeline. Do not cite.', '');
+  L.push('# SecondLook validation study — summary', '');
+  L.push('Generated ' + (opts.now || new Date().toISOString()) + '.', '');
+  L.push('**Stand-ins, not intoxication.** No alcohol was involved. Non-dominant-hand typing, a dual task and self-reported tiredness are safe stand-ins that disturb motor control and attention. They are *not* the same as being drunk. A real product would need a proper clinical study.', '');
+  L.push('## Participants', '');
+  L.push('- Participants: **' + participants.length + '**');
+  CONDITION_ORDER.forEach(id => L.push('- ' + LABELS[id] + ': ' + c[id].participants.size + ' sessions'));
+  L.push('');
+  Object.keys(KINDS).forEach(kind => {
+    const sober = c.a_sober[kind].scores;
+    L.push('## ' + KINDS[kind] + ' score', '');
+    [40, 65].forEach(t => {
+      const k = sober.filter(s => s >= t).length;
+      L.push('- False-alarm rate on sober retests at **' + t + '**: **' + pct(falseAlarmRate(c, t, kind)) + '** (' + k + ' of ' + sober.length + ')' + ci(k, sober.length));
+    });
+    CONDITION_ORDER.slice(1).forEach(id => {
+      const s = c[id][kind].scores;
+      if (!s.length) return;
+      [40, 65].forEach(t => {
+        const k = s.filter(v => v >= t).length;
+        L.push('- Detection, ' + LABELS[id] + ' at **' + t + '**: ' + pct(k / s.length) + ' (' + k + ' of ' + s.length + ')' + ci(k, s.length));
+      });
+    });
+    L.push('', '### Threshold sweep', '');
+    L.push('| Threshold | False alarms (sober) | ' + CONDITION_ORDER.slice(1).map(id => LABELS[id]).join(' | ') + ' |');
+    L.push('|---:|---:|' + CONDITION_ORDER.slice(1).map(() => '---:').join('|') + '|');
+    sweep(c, kind, 30, 80, 5).forEach(r => {
+      L.push('| ' + r.threshold + ' | ' + pct(r.falseAlarm) + ' | ' + CONDITION_ORDER.slice(1).map(id => pct(r.detect[id])).join(' | ') + ' |');
+    });
+    L.push('', '### Which signals separated the conditions best', '');
+    L.push('AUC = chance that a stand-in round shows a larger drift than a sober retest (0.5 = no better than chance, 1.0 = perfect).', '');
+    L.push('| Signal | Mean AUC | ' + CONDITION_ORDER.slice(1).map(id => LABELS[id]).join(' | ') + ' |');
+    L.push('|---|---:|' + CONDITION_ORDER.slice(1).map(() => '---:').join('|') + '|');
+    signalSeparation(c, kind).forEach(r => {
+      L.push('| ' + r.signal + ' | ' + (r.mean == null ? '—' : r.mean.toFixed(2)) + ' | ' + CONDITION_ORDER.slice(1).map(id => r.auc[id] == null ? '—' : r.auc[id].toFixed(2)).join(' | ') + ' |');
+    });
+    L.push('');
+  });
+  L.push('## Limitations', '');
+  L.push('- Small sample; the confidence intervals above are wide on purpose.');
+  L.push('- Stand-ins are not intoxication. They show the scoring reacts to disturbed motor control and attention, not that it detects alcohol.');
+  L.push('- Rounds happen minutes after the baseline, on the same device; real nights differ in time, fatigue and device.');
+  L.push('- Condition order was randomised per participant to spread practice and fatigue effects.');
+  if (opts.synthetic) L.push('', '> ⚠️ **' + WATERMARK + '.**');
+  return L.join('\n') + '\n';
+}
+
+/** Hand-written SVG strip plot: score distribution per condition with threshold lines. */
+function chartSvg(participants, opts) {
+  opts = opts || {};
+  const c = collect(participants);
+  const W = 760, left = 230, right = 30, rowH = 34, panelGap = 60, top = opts.synthetic ? 80 : 50;
+  const plotW = W - left - right;
+  const rows = CONDITION_ORDER.filter(id => c[id].test.scores.length || c[id].chat.scores.length);
+  const panelH = rows.length * rowH + 40;
+  const H = top + 2 * panelH + panelGap + 30;
+  const x = s => left + (s / 100) * plotW;
+  const colors = { a_sober: '#16a34a', b_nondominant: '#d97706', c_dualtask: '#dc2626', d_tired: '#7c3aed' };
+  const out = [];
+  out.push('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="13">');
+  out.push('<rect width="100%" height="100%" fill="#ffffff"/>');
+  out.push('<text x="' + left + '" y="28" font-size="16" font-weight="700" fill="#0f172a">SecondLook study — score per round (stand-ins, not intoxication)</text>');
+  if (opts.synthetic) {
+    out.push('<text x="' + W / 2 + '" y="58" text-anchor="middle" font-size="18" font-weight="800" fill="#dc2626">' + WATERMARK + '</text>');
+    out.push('<text x="' + W / 2 + '" y="' + (H / 2 + 40) + '" text-anchor="middle" font-size="44" font-weight="800" fill="#dc2626" fill-opacity="0.12" transform="rotate(-20 ' + W / 2 + ' ' + (H / 2) + ')">' + WATERMARK + '</text>');
+  }
+  Object.keys(KINDS).forEach((kind, pi) => {
+    const y0 = top + pi * (panelH + panelGap);
+    out.push('<text x="' + left + '" y="' + (y0 + 14) + '" font-weight="700" fill="#0f172a">' + KINDS[kind] + ' score (0–100)</text>');
+    const yTop = y0 + 24, yBot = y0 + 24 + rows.length * rowH;
+    [0, 20, 40, 60, 80, 100].forEach(t => {
+      out.push('<line x1="' + x(t) + '" y1="' + yTop + '" x2="' + x(t) + '" y2="' + yBot + '" stroke="#e2e8f0"/>');
+      out.push('<text x="' + x(t) + '" y="' + (yBot + 16) + '" text-anchor="middle" fill="#64748b">' + t + '</text>');
+    });
+    [40, 65].forEach(t => {
+      out.push('<line x1="' + x(t) + '" y1="' + (yTop - 4) + '" x2="' + x(t) + '" y2="' + yBot + '" stroke="#0f172a" stroke-dasharray="4 3"/>');
+      out.push('<text x="' + x(t) + '" y="' + (yTop - 8) + '" text-anchor="middle" fill="#0f172a" font-size="11">threshold ' + t + '</text>');
+    });
+    rows.forEach((id, ri) => {
+      const cy = yTop + ri * rowH + rowH / 2;
+      out.push('<text x="' + (left - 10) + '" y="' + (cy + 4) + '" text-anchor="end" fill="#0f172a">' + LABELS[id] + ' (n=' + c[id][kind].scores.length + ')</text>');
+      c[id][kind].scores.forEach((s, i) => {
+        const jitter = ((i * 7) % 5 - 2) * 3; // deterministic jitter so dots don't hide each other
+        out.push('<circle cx="' + x(s).toFixed(1) + '" cy="' + (cy + jitter) + '" r="5" fill="' + colors[id] + '" fill-opacity="0.75"><title>' + LABELS[id] + ': ' + s + '</title></circle>');
+      });
+    });
+  });
+  out.push('</svg>');
+  return out.join('\n') + '\n';
+}
+
+// ------------------------------------------------------------------ synthetic data (pipeline testing only)
+function rng(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** FAKE participants for testing the pipeline. Scored with the real app scoring (metrics.js). */
+function syntheticParticipants(M, n, seed) {
+  const r = rng(seed || 42);
+  const gauss = () => { let u = 0, v = 0; while (!u) u = r(); while (!v) v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+  const effect = { a_sober: 0, b_nondominant: 1.1, c_dualtask: 1.6, d_tired: 0.6 };
+  const list = [];
+  for (let i = 1; i <= n; i++) {
+    const base = { reactionMs: 280 + 40 * r(), trackingErr: 4 + 3 * r(), ikiMs: 150 + 80 * r(), ikiCv: 0.5 + 0.2 * r(), backspaceRate: 0.04 + 0.06 * r(), pauseRate: 0.2 * r(), typoRate: 0.01 + 0.02 * r(), oddWordRate: 0.02 + 0.05 * r() };
+    const spread = { reactionMs: 0.08, trackingErr: 0.15, ikiMs: 0.12, ikiCv: 0.15, backspaceRate: 0.5, pauseRate: 1, typoRate: 0.6, oddWordRate: 0.6 };
+    const draw = (k, e) => Math.max(0, base[k] * (1 + spread[k] * 0.6 * gauss() + e * spread[k] * (0.6 + 0.4 * r())) + (k === 'pauseRate' ? e * 0.4 * r() : 0));
+    const statFor = k => M.fromSamples([draw(k, 0), draw(k, 0), draw(k, 0)]);
+    const baseline = { test: {}, chat: {} };
+    M.TEST_KEYS.forEach(k => { baseline.test[k] = statFor(k); });
+    M.CHAT_KEYS.forEach(k => { baseline.chat[k] = statFor(k); });
+    const plan = ['a_sober', 'b_nondominant', 'c_dualtask'].concat(r() < 0.5 ? ['d_tired'] : []);
+    const conditions = plan.map((id, oi) => {
+      const e = effect[id];
+      const pack = (keys, bl) => {
+        const sample = {};
+        keys.forEach(k => { sample[k] = draw(k, e); });
+        const cmp = M.compare(sample, bl, keys);
+        const z = {};
+        keys.forEach(k => { z[k] = null; });
+        cmp.rows.forEach(row => { z[row.key] = Math.round(row.z * 1000) / 1000; });
+        return { values: sample, z: z, score: cmp.score };
+      };
+      return { id: id, label: LABELS[id], standIn: id !== 'a_sober', order: oi + 1, at: 0, selfReport: id === 'd_tired' ? { tiredness: 4, hour: 23 } : null, test: pack(M.TEST_KEYS, baseline.test), chat: pack(M.CHAT_KEYS, baseline.chat) };
+    });
+    list.push({ kind: 'secondlook-study', schema: 1, participant: 'P' + String(i).padStart(2, '0'), synthetic: true, watermark: WATERMARK, createdAt: 0, device: { pointer: 'fine', width: 1280, touch: false }, baseline: baseline, conditions: conditions });
+  }
+  return list;
+}
+
+module.exports = {
+  CONDITION_ORDER, LABELS, WATERMARK,
+  validateParticipant, collect, rateAtOrAbove, falseAlarmRate, detectionRate, wilson, sweep, auc, signalSeparation,
+  summaryMarkdown, chartSvg, syntheticParticipants, rng
+};

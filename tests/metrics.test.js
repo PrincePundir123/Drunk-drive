@@ -112,3 +112,22 @@ test('averageSamples ignores missing values', () => {
   const avg = M.averageSamples([{ a: 1, b: null }, { a: 3, b: 4 }], ['a', 'b', 'c']);
   assert.deepEqual(avg, { a: 2, b: 4, c: null });
 });
+
+test('baselineFromTasks / sampleFromTasks build the same shapes the app used before', () => {
+  const res = {
+    reaction: { trials: [300, 320, 280], reactionMs: 300 },
+    tracking: { trackingErr: 5 },
+    typing: [{ ikiMs: 150, ikiCv: 0.5, backspaceRate: 0.1, pauseRate: 0, typoRate: 0.02 }, { ikiMs: 170, ikiCv: 0.7, backspaceRate: null, pauseRate: 0.5, typoRate: 0 }]
+  };
+  const t = M.baselineFromTasks(res);
+  assert.equal(t.reactionMs.n, 3);
+  assert.equal(t.reactionMs.mean, 300);
+  assert.equal(t.trackingErr.n, 1);
+  assert.equal(t.ikiMs.mean, 160);
+  assert.equal(t.backspaceRate.n, 1, 'missing values are skipped');
+  const s = M.sampleFromTasks(res);
+  assert.equal(s.reactionMs, 300);
+  assert.equal(s.ikiMs, 160);
+  assert.equal(M.compare(s, t, M.TEST_KEYS).level, 'ok');
+  assert.equal(M.baselineFromTasks({ reaction: { trials: [] }, tracking: { trackingErr: null }, typing: [] }).trackingErr.n, 0, 'skipped tracking');
+});

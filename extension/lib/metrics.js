@@ -205,7 +205,27 @@
     return out;
   }
 
+  /** Baseline statistics from one calibration run: { reaction:{trials}, tracking:{trackingErr}, typing:[samples] }. */
+  function baselineFromTasks(res) {
+    var t = {};
+    t.reactionMs = fromSamples(res && res.reaction ? res.reaction.trials : []);
+    t.trackingErr = fromSamples(res && res.tracking ? [res.tracking.trackingErr] : []);
+    TYPING_KEYS.forEach(function (k) {
+      t[k] = fromSamples(((res && res.typing) || []).map(function (s) { return s[k]; }));
+    });
+    return t;
+  }
+
+  /** One comparable sample from a quick-check run (same shape as the baseline). */
+  function sampleFromTasks(res) {
+    return Object.assign(
+      { reactionMs: res && res.reaction ? res.reaction.reactionMs : null, trackingErr: res && res.tracking ? res.tracking.trackingErr : null },
+      averageSamples((res && res.typing) || [], TYPING_KEYS)
+    );
+  }
+
   return {
+    baselineFromTasks: baselineFromTasks, sampleFromTasks: sampleFromTasks,
     mean: mean, median: median, sd: sd, clamp: clamp,
     stat: stat, push: push, statSd: statSd, fromSamples: fromSamples, seeded: seeded,
     levenshtein: levenshtein, normText: normText, typoRate: typoRate,

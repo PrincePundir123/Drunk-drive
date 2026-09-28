@@ -88,6 +88,24 @@ z = (now − your usual) / max(your usual spread, % floor, absolute floor)
 | Corrections, long pauses | More hesitation and fixing |
 | Typos / misspelled words | Accuracy drops |
 
+## Evidence
+
+> Fill this in after running the study (see [`results/README.md`](results/README.md)). Until then, these are placeholders. **No numbers here come from synthetic data.**
+
+We tested SecondLook with **[N] people**, using safe stand-ins for impairment. No alcohol was involved.
+
+| Measure | Quick check | Message |
+|---|---:|---:|
+| False alarms on a sober retest (threshold 40) | [__]% (95% CI [__]–[__]%) | [__]% |
+| False alarms on a sober retest (threshold 65) | [__]% | [__]% |
+| Flagged: non-dominant hand (40) | [__]% | [__]% |
+| Flagged: dual task, counting backwards (40) | [__]% | [__]% |
+| Flagged: tired / late night, self-reported (40) | [__]% (n=[__]) | [__]% |
+
+Signals that separated conditions best: [signal] (AUC [__]), [signal] (AUC [__]). The full report is in `results/summary.md` and the chart in `results/chart.svg`.
+
+**Limitations:** stand-ins are not intoxication. They show that the scoring reacts to disturbed motor control and attention, not that it detects alcohol. The sample is small, and every round happened on the same day and device as the baseline. A real product would need a proper clinical study.
+
 ## Project structure
 
 ```
@@ -99,6 +117,8 @@ js/metrics.js         pure scoring functions (also used by the tests)
 js/tests.js           reaction, tracking and typing tasks + keystroke recorder
 js/app.js             views, the prompt, check-in escalation, log, settings
 sw.js, manifest       offline support + installable app
+study.html, js/study.js  validation study (stand-ins, no alcohol) — not linked from the app
+scripts/analyze.js    study analysis → results/summary.md + chart.svg
 tests/                node:test unit tests
 scripts/serve.js      zero-dependency dev server
 ```

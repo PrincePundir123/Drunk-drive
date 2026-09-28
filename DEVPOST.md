@@ -23,6 +23,10 @@ It's a plain HTML/CSS/JavaScript web app with no framework and no build step, so
 
 Scoring uses per-feature z-scores against the user's own running statistics (Welford's algorithm), with floors that stop false alarms, and counts only drifts in the impaired direction. Optional instant alerts go through ntfy.sh, so the safe contact gets a real push notification with no backend. The scoring logic has Node unit tests, and every flow was tested end to end in a real browser.
 
+## Evidence
+*(Fill in after the study. Placeholders until then, and never from synthetic data.)*
+We ran a small study with [N] people using safe stand-ins for impairment, never alcohol: typing with the non-dominant hand, counting backwards out loud while doing the tasks, and an optional tired round. On a sober retest, SecondLook raised a false alarm [__]% of the time at our default threshold. It flagged [__]% of non-dominant-hand rounds and [__]% of dual-task rounds. Stand-ins aren't intoxication, so this shows the scoring reacts to disturbed motor control and attention. It doesn't prove it detects alcohol. A real product would need a clinical study.
+
 ## Challenges we ran into
 - **Not being annoying.** Too many prompts and people uninstall; too few and it's useless. We compare you only with yourself, set floors on the variance, prompt once per message draft, and learn only from messages that look normal.
 - **Consent vs. safety.** Stepping in when someone can't decide for themselves is the whole point, but it can't happen behind their back. We solved this with advance consent, a visible countdown that says what will happen, and a log of every action.
