@@ -64,7 +64,11 @@
       },
       chat: chat,
       reactionMs: isStat(b.test && b.test.reactionMs) ? { n: b.test.reactionMs.n, mean: b.test.reactionMs.mean, m2: b.test.reactionMs.m2 } : null,
-      lockUntil: lastFlag ? lastFlag + LOCK_WINDOW : 0
+      lockUntil: lastFlag ? lastFlag + LOCK_WINDOW : 0,
+      nightOut: opts.nightOut && opts.nightOut.homeBy ? {
+        startedAt: opts.nightOut.startedAt, homeBy: opts.nightOut.homeBy,
+        planText: String(opts.nightOut.planText || '').slice(0, 160), note: String(opts.nightOut.note || '').slice(0, 120)
+      } : null
     };
   }
 
@@ -89,7 +93,11 @@
       settings: { sensitivity: sens, nudgeTimeout: nudge >= 10 && nudge <= 300 ? nudge : 45 },
       chat: chat,
       reactionMs: isStat(o.reactionMs) ? o.reactionMs : null,
-      lockUntil: Number(o.lockUntil) || 0
+      lockUntil: Number(o.lockUntil) || 0,
+      nightOut: o.nightOut && isFinite(o.nightOut.homeBy) && isFinite(o.nightOut.startedAt) ? {
+        startedAt: Number(o.nightOut.startedAt), homeBy: Number(o.nightOut.homeBy), endedAt: null,
+        planText: String(o.nightOut.planText || '').slice(0, 160), note: String(o.nightOut.note || '').slice(0, 120)
+      } : null
     };
   }
 

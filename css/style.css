@@ -334,6 +334,16 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: .9em; }
 .explainer summary { cursor: pointer; }
 .explainer p { color: var(--muted); margin-top: 10px; }
 
+/* ---------- Night Out ---------- */
+.night-start { margin: 4px 0 14px; }
+.night { border-color: rgba(165, 180, 252, .5); }
+.night-line { margin-top: 6px !important; color: var(--accent-2) !important; font-weight: 600; }
+.plan-card { text-align: left; background: rgba(165, 180, 252, .08); border: 1px solid rgba(165, 180, 252, .45); border-radius: 14px; padding: 12px 14px; margin: 12px 0; }
+.plan-title { margin: 0 0 8px; font-weight: 650; color: var(--text) !important; }
+.plan-card .row-btns { margin: 8px 0 4px; }
+.note-to-self { margin: 8px 0 0; padding: 8px 12px; border-left: 3px solid var(--caution); color: var(--text); font-size: 1.02rem; }
+.note-to-self span { display: block; color: var(--muted); font-size: .8rem; margin-top: 2px; }
+
 /* ---------- log ---------- */
 .log { list-style: none; padding: 0; margin: 14px 0; display: grid; gap: 8px; }
 .log li { display: flex; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }

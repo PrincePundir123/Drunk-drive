@@ -96,7 +96,8 @@
       var b = SH.validateBaselineExport(SH.decodeCode(raw, SH.BASELINE_PREFIX));
       b.importedAt = Date.now();
       b.learned = 0;
-      return chrome.storage.local.set({ baseline: b }).then(function () {
+      var night = b.nightOut; delete b.nightOut;
+      return chrome.storage.local.set({ baseline: b, nightOut: night }).then(function () {
         log('Imported the baseline from ' + (b.name || 'your') + '’s SecondLook web app (exported ' + fmt(b.exportedAt) + '). Only timing numbers were imported.');
         $('import-code').value = '';
         return load();

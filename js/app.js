@@ -10,6 +10,8 @@
   var SH = window.SLShare;
   var SEC = window.SLSecure;
   var RL = window.SLRelay;
+  var NO = window.SLNight;
+  var R = window.SLRides;
   var DICT = new Set(String(window.SL_WORDS || '').split(/\s+/).filter(Boolean));
 
   var HOUR = 3600e3;
@@ -74,6 +76,25 @@
   function getChat() { return chatMemory.slice(); }
   function saveChat(c) { chatMemory = c.slice(-80); }
 
+  // ---------- Night Out ----------
+  function getNight() { var n = getState().nightOut; return NO.isActive(n, Date.now()) ? n : null; }
+  function sensitivityNow(p) { var s = p.settings.sensitivity; return getNight() ? NO.bumpSensitivity(s) : s; }
+
+  /** "You planned to take an Uber home. Here it is →" + one-tap button + note to self. */
+  function planHtml(p, n, src) {
+    if (!n) return '';
+    var ride = n.plan.mode === 'cab' ? R.rideById(n.plan.provider, { address: p.homeAddress, home: p.home }) : null;
+    var text = NO.planText(n.plan, p.contact.name);
+    var friendSms = n.plan.mode === 'friend' && n.plan.friendIsContact
+      ? '<a class="btn secondary" href="' + esc(smsLink(p.contact.phone, askForRideText(p))) + '" data-log-type="contact" data-log="Texted ' + esc(p.contact.name) + ' for the ride you planned">💬 Text ' + esc(p.contact.name) + '</a>' : '';
+    return '<div class="plan-card"><p class="plan-title">🌙 ' + esc(text) + (ride ? ' Here it is →' : '') + '</p>' +
+      (ride || friendSms ? '<div class="row-btns">' +
+        (ride ? '<a class="btn primary" href="' + esc(ride.url) + '" target="_blank" rel="noopener" data-ride-id="' + ride.id + '" data-ride-src="' + esc(src || 'your Night Out plan') + '">Open ' + esc(ride.name) + '</a>' : '') +
+        friendSms + '</div>' : '') +
+      (n.note ? '<blockquote class="note-to-self">“' + esc(n.note) + '”<span>— you, earlier tonight</span></blockquote>' : '') +
+      '</div>';
+  }
+
   function log(type, text) {
     var l = S.get('log', []);
     l.unshift({ at: Date.now(), type: type, text: text });
@@ -130,6 +151,20 @@
         '<a class="btn secondary" href="' + esc(telLink(p.contact.phone)) + '" data-log-type="contact" data-log="Called ' + esc(p.contact.name) + '">📞 Call</a>' +
       '</div></div>';
   }
+  /** One-tap ride: the link opens normally; we copy the address when the link can't carry it, and log it. */
+  function onRideClick(id, src) {
+    var p = getProfile();
+    if (!p) return;
+    var opt = R.rideById(id, { address: p.homeAddress, home: p.home });
+    if (!opt) return;
+    log('ride', 'Opened ' + opt.name + ' to get a ride home' + (src ? ' (from ' + src + ')' : '') + (opt.prefilled ? ', with your home location filled in.' : '.'));
+    if (opt.copyAddress && p.homeAddress) {
+      R.copyText(p.homeAddress).then(function (ok) { if (ok) toast('Home address copied – paste it as destination'); });
+    } else if (!p.homeAddress && id !== 'taxi') {
+      toast('Tip: add your home address in Settings for one-tap rides');
+    }
+  }
+
   function openHelp() {
     var p = getProfile();
     if (!p) return;
@@ -394,6 +429,7 @@
   // ======================================================================
   function renderHome(root) {
     var p = getProfile(), b = getBaseline(), st = getState();
+    var night = getNight();
     var flags = recentFlags(LOCK_WINDOW);
     var lc = st.lastCheck && Date.now() - st.lastCheck.at < 3 * HOUR ? st.lastCheck : null;
     var level = 'ok', title = 'All quiet', text = 'SecondLook is watching quietly. Your messages are compared with your sober baseline — only on this device.';
@@ -411,7 +447,9 @@
     root.innerHTML = '<div class="container">' +
       '<p class="eyebrow">' + greeting() + '</p>' +
       '<h1>Hi ' + esc(p.name) + '</h1>' +
-      '<section class="status card level-' + level + '" aria-live="polite"><span class="status-dot" aria-hidden="true"></span><div><h2>' + esc(title) + '</h2><p>' + esc(text) + '</p></div></section>' +
+      '<section class="status card level-' + level + '" aria-live="polite"><span class="status-dot" aria-hidden="true"></span><div><h2>' + esc(title) + '</h2><p>' + esc(text) + '</p>' +
+        (night ? '<p class="night-line">🌙 Night Out active – home by ' + esc(fmtTime(night.homeBy)) + '</p>' : '') + '</div></section>' +
+      (night ? nightCard(p, night) : '<button type="button" class="btn secondary big full night-start" data-act="night-start">🌙 Going out tonight? Make a plan while you’re sober</button>') +
       (p.demo ? '<section class="card demo-card"><h2>🧪 Demo mode</h2><p>This profile has a pre-made baseline so you can explore right away. Try this:</p><ol>' +
         '<li>Open <a href="#/chat">Messages</a> and tap <b>Simulate an impaired message</b> — or type slowly with lots of corrections.</li>' +
         '<li>Ignore the prompt and watch SecondLook check in, then alert the (fictional) safe contact.</li>' +
@@ -436,7 +474,7 @@
       '<section class="card"><h2>Tonight</h2>' +
         (lc ? '<p>Last quick check: <b>' + lc.score + '/100</b> (' + esc(levelWord(lc.level)) + ') · ' + esc(ago(lc.at)) + '</p>' : '<p class="muted">No quick checks in the last few hours.</p>') +
         (flags.length ? '<ul class="flags">' + flags.slice().reverse().map(function (f) {
-          return '<li>' + (f.source === 'message' ? 'A message looked different' : 'A quick check looked different') + ' · ' + f.score + '/100 · ' + esc(fmtTime(f.at)) + '</li>';
+          return '<li>' + (f.source === 'message' ? 'A message looked different · ' + f.score + '/100' : f.source === 'night' ? 'A Night Out check-in was missed' : 'A quick check looked different · ' + f.score + '/100') + ' · ' + esc(fmtTime(f.at)) + '</li>';
         }).join('') + '</ul>' : '<p class="muted">Nothing flagged.</p>') +
       '</section>' +
       '</div>';
@@ -450,6 +488,9 @@
       else if (act === 'exit-demo') { if (confirm('Exit the demo? This clears the demo profile, messages and log from this browser.')) resetAll(); }
       else if (act === 'own-baseline') go('calibrate');
       else if (act === 'contact-view') openContactView();
+      else if (act === 'night-start') openNightForm();
+      else if (act === 'home-safe') homeSafe();
+      else if (act === 'night-demo-remind') demoReminderNow();
     }
     return function () { root.removeEventListener('click', onHomeClick); };
   }
@@ -562,7 +603,7 @@
       text = text.trim();
       if (!text) return;
       var analysis = analyzeMessage(text, events);
-      var threshold = SENSITIVITY[getProfile().settings.sensitivity] || 55;
+      var threshold = SENSITIVITY[sensitivityNow(getProfile())] || 55;
       if (analysis && analysis.score >= threshold && !draftNudged) {
         draftNudged = true;
         openNudge(text, analysis, {
@@ -626,6 +667,7 @@
         '<div class="nudge-icon" aria-hidden="true">👀</div>' +
         '<h2>Want a second look?</h2>' +
         '<p>This looks a little different from how you usually text.</p>' +
+        planHtml(p, getNight(), 'the second-look prompt') +
         '<blockquote class="nudge-msg">' + esc(text) + '</blockquote>' +
         (reasons.length ? '<details><summary>What’s different?</summary><ul>' + reasons.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul></details>' : '') +
         '<div class="stack">' +
@@ -821,6 +863,7 @@
       return '<div class="ci-ring" style="--val:' + Math.round(left / total * 100) + '"><span id="ci-secs">' + left + '</span><small>sec</small></div>' +
         '<h2 id="ci-title">Hey ' + name + ', just checking in 💙</h2>' +
         '<p class="muted">' + esc(c.reason) + '</p>' +
+        planHtml(p, getNight(), 'the check-in') +
         (c.note ? '<p class="ci-note">' + esc(c.note) + '</p>' : '') +
         '<p class="ci-consent">' + consentLine(p) + '</p>' +
         '<div class="ci-actions">' +
@@ -855,6 +898,7 @@
       return '<div class="ci-icon" aria-hidden="true">🤍</div>' +
         '<h2 id="ci-title">No problem — nobody was contacted</h2>' +
         '<p class="muted">You chose not to auto-alert anyone. If you need a hand getting home, it’s all right here.</p>' +
+        planHtml(p, getNight(), 'the check-in') +
         '<div class="ci-actions"><button type="button" class="btn primary big" data-ci="ride">🚗 Get a ride home</button>' + contactBtns +
         '<button type="button" class="btn ghost" data-ci="close">Close</button></div>';
     }
@@ -862,6 +906,7 @@
     return '<div class="ci-icon" aria-hidden="true">💙</div>' +
       '<h2 id="ci-title">Good call, ' + name + '</h2>' +
       '<p class="muted">' + esc(c.note || 'Thanks for answering.') + '</p>' +
+      planHtml(p, getNight(), 'the check-in') +
       '<div class="help-inline">' + helpHtml(p) + '</div>' +
       '<button type="button" class="btn ghost full" data-ci="close">Close</button>';
   }
@@ -1128,7 +1173,7 @@
   // ======================================================================
   // view: transparency log
   // ======================================================================
-  var LOG_ICONS = { extension: '🧩', setup: '📝', baseline: '📏', nudge: '👀', checkin: '💙', alert: '📣', check: '🩺', settings: '🔒', ride: '🚗', contact: '💬', data: '🗂️', action: '•' };
+  var LOG_ICONS = { night: '🌙', extension: '🧩', setup: '📝', baseline: '📏', nudge: '👀', checkin: '💙', alert: '📣', check: '🩺', settings: '🔒', ride: '🚗', contact: '💬', data: '🗂️', action: '•' };
 
   function renderLog(root) {
     var entries = S.get('log', []);
@@ -1191,6 +1236,30 @@
   // ======================================================================
   // view: settings (locked after a flag — the "sober you decides" rule)
   // ======================================================================
+  /** 15-second reaction check in a dialog. opts: { title, text, onPass(r), onFail(r) } */
+  function openProve(opts) {
+    var b = getBaseline();
+    var w = null;
+    var m = openModal('<h2>' + esc(opts.title) + '</h2>' +
+      '<p class="muted">' + esc(opts.text) + '</p>' +
+      '<div class="unlock-test"></div><p class="form-error" id="unlock-msg" role="alert"></p>' +
+      '<button type="button" class="btn ghost full" data-close>Cancel</button>',
+      { label: opts.title, onClose: function () { if (w) w.destroy(); } });
+    $('[data-close]', m.el).addEventListener('click', function () { m.close('cancel'); });
+    w = T.reactionTest($('.unlock-test', m.el), {
+      trials: 5,
+      onDone: function (r) {
+        var cmp = M.compare({ reactionMs: r.reactionMs }, b.test, ['reactionMs']);
+        var pass = (cmp.score == null || cmp.score < 40) && r.falseStarts <= 1;
+        if (pass) { m.close('done'); opts.onPass(r); }
+        else {
+          if (opts.onFail) opts.onFail(r);
+          $('#unlock-msg', m.el).textContent = 'Your reaction time was ' + Math.round(r.reactionMs) + ' ms (usual ' + Math.round(b.test.reactionMs.mean) + ' ms). Not this time — maybe let someone else drive.';
+        }
+      }
+    });
+  }
+
   function openUnlock(after) {
     var b = getBaseline();
     var w = null;
@@ -1291,7 +1360,11 @@
       renderView(false);
     });
 
-    function extData() { return SH.buildBaselineExport({ baseline: getBaseline(), profile: getProfile(), flags: getState().flags, appUrl: location.href.split('#')[0] }); }
+    function extData() {
+      var n = getNight(), pp = getProfile();
+      return SH.buildBaselineExport({ baseline: getBaseline(), profile: pp, flags: getState().flags, appUrl: location.href.split('#')[0],
+        nightOut: n ? { startedAt: n.startedAt, homeBy: n.homeBy, planText: NO.planText(n.plan, pp.contact.name), note: n.note } : null });
+    }
     $('#ext-export', root).addEventListener('click', function () {
       $('#ext-code', root).value = SH.encodeCode(SH.BASELINE_PREFIX, extData());
       $('#ext-code-wrap', root).hidden = false;
@@ -1306,6 +1379,255 @@
     $('#reset', root).addEventListener('click', function () {
       if (confirm('Delete everything SecondLook stored in this browser? This can’t be undone.')) resetAll();
     });
+  }
+
+  // ======================================================================
+  // Night Out mode
+  // ======================================================================
+  function nightCard(p, n) {
+    var next = NO.nextReminder(n, Date.now());
+    return '<section class="card night">' +
+      '<h2>🌙 Night Out active – home by ' + esc(fmtTime(n.homeBy)) + '</h2>' +
+      planHtml(p, n, 'your Night Out card') +
+      '<p class="small muted">' + (next ? 'Next check-in reminder: ' + esc(fmtTime(next)) + '. ' : 'No more check-in reminders. ') +
+        'Sensitivity is one level higher tonight (' + esc(sensitivityNow(p)) + ').</p>' +
+      '<div class="row-btns"><button type="button" class="btn primary" data-act="home-safe">🏠 Home safe</button>' +
+      (p.demo ? '<button type="button" class="btn ghost" data-act="night-demo-remind">🧪 Trigger a check-in reminder now</button>' : '') + '</div>' +
+      '</section>';
+  }
+
+  function defaultHomeBy() {
+    var d = new Date(Date.now() + 3 * HOUR);
+    d.setMinutes(d.getMinutes() < 30 ? 30 : 60, 0, 0);
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+
+  function openNightForm() {
+    var p = getProfile();
+    var cname = esc(p.contact.name);
+    var m = openModal('<h2>🌙 Going out tonight?</h2>' +
+      '<p class="muted">Decide now, while you’re thinking clearly. Later tonight SecondLook shows you <b>your own plan</b> — not a lecture.</p>' +
+      '<form id="night-form" novalidate>' +
+        '<fieldset class="group"><legend>How I’m getting home</legend>' +
+          '<label class="check"><input type="radio" name="mode" value="cab" checked><span>A cab</span></label>' +
+          '<label class="check"><input type="radio" name="mode" value="friend"><span>A friend drives me</span></label>' +
+          '<label class="check"><input type="radio" name="mode" value="walk"><span>Walking</span></label>' +
+          '<label class="check"><input type="radio" name="mode" value="stay"><span>Staying over</span></label>' +
+        '</fieldset>' +
+        '<label class="field" data-show="cab"><span>Which app?</span><select name="provider"><option value="uber">Uber</option><option value="ola">Ola</option><option value="rapido">Rapido</option></select></label>' +
+        '<label class="field" data-show="friend" hidden><span>Who? <em>(leave empty for ' + cname + ')</em></span><input name="friend" maxlength="40" placeholder="' + cname + '"></label>' +
+        '<div class="row2">' +
+          '<label class="field"><span>Home by</span><input type="time" name="homeBy" value="' + defaultHomeBy() + '" required></label>' +
+          '<label class="field"><span>Check in with me</span><select name="everyMin"><option value="60">Every hour</option><option value="90" selected>Every 90 minutes</option><option value="120">Every 2 hours</option><option value="0">No check-ins</option></select></label>' +
+        '</div>' +
+        '<label class="field"><span>A note to later-tonight me <em>(optional)</em></span><textarea name="note" rows="2" maxlength="120" placeholder="Don’t drive, ' + esc(p.name) + '. Seriously."></textarea></label>' +
+        '<label class="check"><input type="checkbox" name="ntfy"><span>Also send the check-in reminders to <b>my own phone</b> through the free ntfy app. They say only “SecondLook check-in”.</span></label>' +
+        '<p class="small muted">Browsers slow down timers in background tabs, so in-app reminders can arrive late. Allow notifications, or tick the ntfy option, to be reminded reliably.</p>' +
+        '<p class="form-error" role="alert"></p>' +
+        '<div class="row-btns"><button type="submit" class="btn primary">Start Night Out</button><button type="button" class="btn ghost" data-close>Cancel</button></div>' +
+      '</form>', { label: 'Going out tonight' });
+    var form = $('#night-form', m.el);
+    function sync() {
+      var mode = form.querySelector('input[name=mode]:checked').value;
+      $$('[data-show]', form).forEach(function (el) { el.hidden = el.getAttribute('data-show') !== mode; });
+    }
+    form.addEventListener('change', sync);
+    $('[data-close]', m.el).addEventListener('click', function () { m.close('cancel'); });
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var f = {
+        mode: (form.querySelector('input[name=mode]:checked') || {}).value,
+        provider: form.elements.provider.value, friend: form.elements.friend.value,
+        homeBy: form.elements.homeBy.value, everyMin: form.elements.everyMin.value, note: form.elements.note.value
+      };
+      var v = NO.validateForm(f, Date.now(), p.contact.name);
+      if (v.error) { $('.form-error', form).textContent = v.error; return; }
+      var wantNtfy = form.elements.ntfy.checked;
+      var n = NO.create(v, Date.now(), p.settings.sensitivity);
+      var st = getState();
+      st.nightOut = n;
+      saveState(st);
+      log('night', 'You started Night Out. ' + NO.planText(n.plan, p.contact.name) + ' Home by ' + fmtTime(n.homeBy) + '. ' +
+        (n.reminders.length ? n.reminders.length + ' check-in reminder' + (n.reminders.length === 1 ? '' : 's') + ' (every ' + n.everyMin + ' min). ' : 'No check-in reminders. ') +
+        'Sensitivity raised from ' + p.settings.sensitivity + ' to ' + NO.bumpSensitivity(p.settings.sensitivity) + ' for tonight.' + (n.note ? ' You left yourself a note.' : ''));
+      m.close('done');
+      if ('Notification' in window && Notification.permission === 'default') {
+        try {
+          Notification.requestPermission().then(function (res) { log('night', 'Browser notifications for reminders: ' + (res === 'granted' ? 'allowed' : 'not allowed') + '.'); });
+        } catch (err) { /* ignore */ }
+      }
+      if (wantNtfy && n.reminders.length) scheduleSelfReminders(p, n);
+      renderView(false);
+    });
+    sync();
+  }
+
+  /** Pre-schedule generic reminders on the user's OWN ntfy topic, so they arrive even if this tab is asleep. */
+  function scheduleSelfReminders(p, n) {
+    if (!p.selfTopic) { p.selfTopic = SEC.newTopic(); saveProfile(p); }
+    var click = location.href.split('#')[0] + '#/home';
+    Promise.all(n.reminders.map(function (r) {
+      return RL.publish(p.selfTopic, 'SecondLook check-in 💙 Open the app and answer — it only takes a tap.', {
+        title: 'SecondLook', at: String(Math.floor(r.at / 1000)), click: click, priority: 'high', tags: 'crescent_moon'
+      });
+    })).then(function (res) {
+      var ok = res.filter(Boolean).length;
+      updateNight(function (x) { x.selfReminders = ok > 0; });
+      log('night', ok ? 'Scheduled ' + ok + ' reminder' + (ok === 1 ? '' : 's') + ' on your own ntfy topic (they say only “SecondLook check-in”).' : 'Couldn’t schedule phone reminders (no connection?) — in-app reminders still work while this tab is open.');
+      if (!ok) return;
+      var m2 = openModal('<h2>Get the reminders on your phone</h2>' +
+        '<p class="muted">Install the free ntfy app and subscribe to your private topic once:</p>' +
+        '<p><code class="topic">' + esc(p.selfTopic) + '</code></p>' +
+        '<div class="row-btns"><a class="btn primary" href="ntfy://ntfy.sh/' + esc(p.selfTopic) + '">Open in ntfy app</a><a class="btn ghost" target="_blank" rel="noopener" href="https://ntfy.sh/' + esc(p.selfTopic) + '">Use ntfy in the browser</a></div>' +
+        '<p class="small muted">Scheduled reminders can’t be cancelled, so if you get home early you may still get one — just ignore it.</p>' +
+        '<button type="button" class="btn ghost full" data-close>Done</button>', { label: 'Phone reminders' });
+      $('[data-close]', m2.el).addEventListener('click', function () { m2.close('done'); });
+    });
+  }
+
+  function updateNight(fn) {
+    var st = getState();
+    if (!st.nightOut) return null;
+    fn(st.nightOut, st);
+    saveState(st);
+    return st.nightOut;
+  }
+
+  var reminderModal = null;
+  function showReminder(idx, leftMs) {
+    var p = getProfile(), n = getNight();
+    if (!p || !n) return;
+    var t0 = Date.now(), done = false, timer = null, spoken = null;
+    reminderModal = openModal('<div class="nudge">' +
+      '<div class="nudge-icon" aria-hidden="true">🌙</div>' +
+      '<h2>Night Out check-in</h2>' +
+      '<p>It’s ' + esc(fmtTime(Date.now())) + ' — how’s it going, ' + esc(p.name) + '?</p>' +
+      planHtml(p, n, 'a Night Out reminder') +
+      '<div class="stack"><button type="button" class="btn primary" data-r="ok">I’m OK</button><button type="button" class="btn secondary" data-r="home">I’m heading home now</button></div>' +
+      '<div class="timeout"><div class="timeout-bar"><span></span></div><p class="tiny">If there’s no answer in <b data-secs></b>s, SecondLook will check in with you.</p></div>' +
+      '<div class="sr-only" aria-live="polite" data-live></div></div>', {
+        label: 'Night Out check-in',
+        onClose: function (reason) {
+          clearInterval(timer);
+          reminderModal = null;
+          if (!done && (reason === 'escape' || reason === 'backdrop')) { done = true; answerReminder(idx, 'dismissed the reminder'); }
+        }
+      });
+    var m = reminderModal;
+    var bar = $('.timeout-bar span', m.el), secsEl = $('[data-secs]', m.el), live = $('[data-live]', m.el);
+    var total = getProfile().settings.nudgeTimeout * 1000;
+    function tick() {
+      var left = leftMs - (Date.now() - t0);
+      var s = Math.max(0, Math.ceil(left / 1000));
+      secsEl.textContent = s;
+      bar.style.width = Math.max(0, left / total * 100) + '%';
+      if ((s === 30 || s === 10 || s === 5) && spoken !== s) { spoken = s; live.textContent = s + ' seconds left to answer.'; }
+      if (left <= 0 && !done) { done = true; clearInterval(timer); m.close('timeout'); missReminder(idx); }
+    }
+    timer = setInterval(tick, 250);
+    tick();
+    m.el.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-r]');
+      if (!b || done) return;
+      done = true;
+      m.close('answered');
+      answerReminder(idx, b.getAttribute('data-r') === 'home' ? 'I’m heading home now' : 'I’m OK');
+    });
+  }
+
+  function answerReminder(idx, what) {
+    updateNight(function (n) { if (n.reminders[idx]) { n.reminders[idx].status = 'done'; n.reminders[idx].answeredAt = Date.now(); } });
+    log('night', 'You answered the Night Out check-in: “' + what + '”.');
+    if (/heading home/.test(what)) toast('Safe trip — tap “Home safe” when you’re in 💙');
+    if (currentView === 'home') renderView(false);
+  }
+
+  function missReminder(idx) {
+    updateNight(function (n) { if (n.reminders[idx]) n.reminders[idx].status = 'missed'; });
+    addFlag('night', 60); // counts like an ignored prompt (locks settings, shows on the dashboard)
+    log('night', 'No answer to the Night Out check-in — that counts like an ignored prompt.');
+    startCheckin('You missed a Night Out check-in.');
+  }
+
+  function notifyIfHidden() {
+    try {
+      if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
+        new Notification('SecondLook check-in', { body: 'How’s it going? Tap to answer.', tag: 'secondlook-night', icon: 'assets/icon-192.png' });
+      }
+    } catch (e) { /* notifications are optional */ }
+  }
+
+  function nightTick() {
+    try {
+      var st = getState(), n = st.nightOut, p = getProfile(), now = Date.now();
+      if (!n || n.endedAt || !p) return;
+      if (!NO.isActive(n, now)) {
+        n.endedAt = now; n.autoEnded = true; saveState(st);
+        log('night', 'Night Out ended on its own (12 hours after your home-by time).');
+        if (currentView === 'home') renderView(false);
+        return;
+      }
+      if (st.checkin) return;                                   // the check-in screen has priority
+      if (activeModal && activeModal !== reminderModal) return; // never replace a second-look prompt
+      var openIdx = -1;
+      (n.reminders || []).forEach(function (r, i) { if (r.status === 'prompted') openIdx = i; });
+      if (openIdx >= 0) {
+        var left = n.reminders[openIdx].promptedAt + p.settings.nudgeTimeout * 1000 - now;
+        if (left <= 0) { if (reminderModal) reminderModal.close('timeout'); missReminder(openIdx); }
+        else if (!reminderModal) showReminder(openIdx, left);
+        return;
+      }
+      var d = NO.dueReminder(n, now);
+      if (d.due) {
+        d.skipped.forEach(function (i) { n.reminders[i].status = 'skipped'; });
+        n.reminders[d.due.index].status = 'prompted';
+        n.reminders[d.due.index].promptedAt = now;
+        saveState(st);
+        log('night', 'Night Out check-in reminder (' + fmtTime(d.due.at) + ').' + (d.skipped.length ? ' ' + d.skipped.length + ' earlier reminder(s) were missed while the app was asleep.' : ''));
+        notifyIfHidden();
+        showReminder(d.due.index, p.settings.nudgeTimeout * 1000);
+        return;
+      }
+      if (NO.isOverdue(n, now)) {
+        n.overdueFired = true; saveState(st);
+        log('night', 'It’s past your home-by time (' + fmtTime(n.homeBy) + ') plus 30 minutes and “Home safe” wasn’t tapped.');
+        startCheckin('You planned to be home by ' + fmtTime(n.homeBy) + ' and haven’t tapped “Home safe” yet.');
+      }
+    } catch (e) { /* fail open: Night Out must never break the app */ }
+  }
+
+  function homeSafe() {
+    var st = getState(), n = st.nightOut;
+    if (!n || n.endedAt) return;
+    if (NO.flaggedSince(st.flags, n.startedAt) && Date.now() < n.homeBy) {
+      openProve({
+        title: 'Quick check before ending Night Out',
+        text: 'Something was flagged tonight, so ending your plan before your home-by time needs a 15-second reaction check.',
+        onPass: function (r) { endNight('after passing a reaction check (' + Math.round(r.reactionMs) + ' ms)'); },
+        onFail: function () { log('night', 'A reaction check to end Night Out early did not pass — the plan stays on.'); }
+      });
+      return;
+    }
+    endNight('');
+  }
+
+  function endNight(how) {
+    var n = updateNight(function (x) { x.endedAt = Date.now(); });
+    if (!n) return;
+    var answered = n.reminders.filter(function (r) { return r.status === 'done'; }).length;
+    log('night', 'You tapped “Home safe”' + (how ? ' ' + how : '') + '. Night Out ended — ' + answered + ' of ' + n.reminders.length + ' check-ins answered. Sensitivity is back to ' + getProfile().settings.sensitivity + '.' +
+      (n.selfReminders ? ' Scheduled phone reminders may still arrive — you can ignore them.' : ''));
+    toast('Welcome home 💙');
+    renderView(false);
+  }
+
+  function demoReminderNow() {
+    var n = updateNight(function (x) {
+      var r = x.reminders.filter(function (y) { return y.status === 'pending'; })[0];
+      if (r) r.at = Date.now() - 1000;
+      else x.reminders.push({ at: Date.now() - 1000, status: 'pending' });
+    });
+    if (n) { log('night', '[Demo] Triggered a Night Out check-in reminder.'); nightTick(); }
   }
 
   function contactLinkCard(p, locked) {
@@ -1412,13 +1734,14 @@
       test: { reactionMs: s(320, 45, 10), trackingErr: s(6, 1.5, 3), ikiMs: s(190, 35, 4), ikiCv: s(0.6, 0.12, 4), backspaceRate: s(0.08, 0.05, 4), pauseRate: s(0.2, 0.3, 4), typoRate: s(0.03, 0.02, 4) },
       chat: { ikiMs: s(210, 45, 12), ikiCv: s(0.65, 0.15, 12), backspaceRate: s(0.09, 0.06, 12), pauseRate: s(0.5, 0.5, 12), oddWordRate: s(0.06, 0.06, 12) }
     });
-    saveState({ flags: [], lastCheck: null, checkin: null, unlockedAt: 0 });
+    var demoNight = NO.create({ plan: { mode: 'cab', provider: 'uber' }, homeBy: now + 2 * HOUR, everyMin: 90, note: 'Don’t drive, Alex. Seriously.' }, now - 20 * 60e3, 'balanced');
+    saveState({ flags: [], lastCheck: null, checkin: null, unlockedAt: 0, nightOut: demoNight });
     chatMemory = [];
     S.set('log', [
       { at: now - 2 * 86400e3 + 60e3, type: 'baseline', text: '[Demo] You created your sober baseline. Reaction 320 ms, tracking error 6.0%.' },
       { at: now - 2 * 86400e3, type: 'setup', text: '[Demo] You set up SecondLook. Safe contact: Priya. Auto-alert on no response: ON. Share location: OFF.' }
     ]);
-    log('data', 'Demo profile loaded (fictional user “Alex” and safe contact “Priya”).');
+    log('data', 'Demo profile loaded (fictional user “Alex” and safe contact “Priya”), with a Night Out plan: an Uber home by ' + fmtTime(demoNight.homeBy) + '.');
     go('home');
     toast('Demo loaded — open Messages to try it');
   }
@@ -1436,6 +1759,8 @@
     document.addEventListener('click', function (e) {
       var a = e.target.closest('[data-log]');
       if (a) log(a.getAttribute('data-log-type') || 'action', a.getAttribute('data-log'));
+      var ride = e.target.closest('[data-ride-id]');
+      if (ride) onRideClick(ride.getAttribute('data-ride-id'), ride.getAttribute('data-ride-src'));
     });
     window.addEventListener('hashchange', route);
 
@@ -1463,6 +1788,11 @@
 
     route();
     showCheckin();
+
+    // Night Out reminders (the tab may be throttled in the background; we also check on return).
+    setInterval(nightTick, 5000);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) nightTick(); });
+    setTimeout(nightTick, 800);
 
     if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
       window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () { /* offline support is optional */ }); });
