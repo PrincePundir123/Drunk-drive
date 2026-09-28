@@ -119,31 +119,23 @@
   // ======================================================================
   // links: rides and your safe contact
   // ======================================================================
-  function smsLink(phone, body) { return 'sms:' + phoneClean(phone) + '?&body=' + encodeURIComponent(body); }
-  function waLink(phone, body) { return 'https://wa.me/' + phoneClean(phone).replace(/\D/g, '') + '?text=' + encodeURIComponent(body); }
-  function telLink(phone) { return 'tel:' + phoneClean(phone); }
-  function rideLinks(p) {
-    var home = ((p && p.homeAddress) || '').trim();
-    var uber = 'https://m.uber.com/ul/?action=setPickup&pickup=my_location';
-    if (home) uber += '&dropoff[formatted_address]=' + encodeURIComponent(home);
-    return [
-      { name: 'Uber', url: uber },
-      { name: 'Ola', url: 'https://book.olacabs.com/' },
-      { name: 'Rapido', url: 'https://www.rapido.bike/' },
-      { name: 'Lyft', url: 'https://ride.lyft.com/' },
-      { name: 'Taxis near me', url: 'https://www.google.com/maps/search/taxi+near+me' }
-    ];
-  }
+  // All ride / call / message links come from js/rides.js (shared with the contact view and extension).
+  function smsLink(phone, body) { return R.smsUrl(phone, body); }
+  function waLink(phone, body) { return R.waUrl(phone, body); }
+  function telLink(phone) { return R.telUrl(phone); }
   function askForRideText(p) {
     return 'Hey ' + p.contact.name + ", I've been drinking and I don't think I should drive. Could you help me get home?";
   }
   function helpHtml(p) {
-    var rides = rideLinks(p).map(function (r) {
-      return '<a class="ride" href="' + esc(r.url) + '" target="_blank" rel="noopener" data-log-type="ride" data-log="Opened ' + esc(r.name) + ' to find a ride home">' + esc(r.name) + '</a>';
+    var rides = R.rideOptions({ address: p.homeAddress, home: p.home }).map(function (r) {
+      return '<a class="ride" href="' + esc(r.url) + '" target="_blank" rel="noopener" data-ride-id="' + r.id + '">' + esc(r.name) + (r.prefilled ? ' ✓' : '') + '</a>';
     }).join('');
+    var hint = p.home && R.hasCoords(p.home) ? 'Uber opens with your home filled in (✓). For the others we copy your address — paste it as the destination.'
+      : p.homeAddress ? 'We’ll copy your home address when you open a ride app — paste it as the destination.'
+      : 'Add your home address in Settings for one-tap rides.';
     var ask = askForRideText(p);
     return '<div class="help">' +
-      '<h3>Get a ride</h3><div class="rides">' + rides + '</div>' +
+      '<h3>Get a ride</h3><div class="rides">' + rides + '</div><p class="small muted ride-hint">' + esc(hint) + '</p>' +
       '<h3>Or ask ' + esc(p.contact.name) + '</h3>' +
       '<div class="contact-actions">' +
         '<a class="btn secondary" href="' + esc(smsLink(p.contact.phone, ask)) + '" data-log-type="contact" data-log="Texted ' + esc(p.contact.name) + ' for a ride">💬 Text</a>' +
@@ -168,8 +160,7 @@
   function openHelp() {
     var p = getProfile();
     if (!p) return;
-    var m = openModal('<h2>Get home safe 💙</h2><p class="muted">Leaving the car is always the right call.' +
-      (p.homeAddress ? ' Uber will open with your home address filled in.' : '') + '</p>' + helpHtml(p) +
+    var m = openModal('<h2>Get home safe 💙</h2><p class="muted">Leaving the car is always the right call.</p>' + helpHtml(p) +
       '<button type="button" class="btn ghost full" data-close>Close</button>', { label: 'Get home safe' });
     $('[data-close]', m.el).addEventListener('click', function () { m.close('close'); });
   }
@@ -203,7 +194,8 @@
     document.addEventListener('keydown', onKey);
     if (dismissible) wrap.addEventListener('click', function (e) { if (e.target === wrap) modal.close('backdrop'); });
     activeModal = modal;
-    var first = modal.el.querySelector('[autofocus], button, [href], input, textarea, select');
+    // [autofocus] wins; otherwise the first focusable element.
+    var first = modal.el.querySelector('[autofocus]') || modal.el.querySelector('button, [href], input, textarea, select');
     if (first) setTimeout(function () { if (document.contains(first)) first.focus(); }, 30);
     return modal;
   }
@@ -846,6 +838,32 @@
     if (currentView === 'home' || currentView === 'settings') renderView(false);
   }
 
+  function emergencyBtn() {
+    return '<button type="button" class="btn danger" data-ci="112">🆘 Call ' + R.EMERGENCY_NUMBER + ' (emergency)</button>';
+  }
+
+  /** Confirm step so 112 can't be dialled by accident. */
+  function confirmEmergency() {
+    var num = R.EMERGENCY_NUMBER;
+    var m = openModal('<h2>Call ' + num + '?</h2>' +
+      '<p class="muted">This calls India’s emergency number. Use it if you or someone with you is hurt or in danger.</p>' +
+      '<div class="stack"><a class="btn danger big" href="' + R.emergencyUrl() + '" id="e-yes">Yes, call ' + num + '</a>' +
+      '<button type="button" class="btn ghost" data-close autofocus>Cancel</button></div>', { label: 'Call ' + num + '?' });
+    $('#e-yes', m.el).addEventListener('click', function () {
+      log('contact', 'You called ' + num + ' (emergency).');
+      var c = getState().checkin;
+      setTimeout(function () {
+        m.close('called');
+        if (c && (c.stage === 'asking' || c.stage === 'expired')) respondCheckin('You called ' + num + '.');
+      }, 0);
+    });
+    $('[data-close]', m.el).addEventListener('click', function () {
+      log('contact', 'You opened the ' + num + ' button and cancelled.');
+      m.close('cancel');
+    });
+    return m; // Cancel has autofocus: the safe choice is the default
+  }
+
   function consentLine(p) {
     return p.consent.notifyOnTimeout
       ? 'If there’s no response, <b>' + esc(p.contact.name) + '</b> will be alerted — you agreed to this while sober on ' + esc(fmtDate(p.consent.agreedAt)) + '.'
@@ -869,6 +887,7 @@
         '<div class="ci-actions">' +
           '<button type="button" class="btn primary big" data-ci="ride">🚗 Get a ride home</button>' + contactBtns +
           '<button type="button" class="btn ghost big" data-ci="prove">✅ I’m okay — 15-second check</button>' +
+          emergencyBtn() +
         '</div>';
     }
     if (c.stage === 'proving') {
@@ -889,6 +908,7 @@
           '<a class="btn secondary big" data-ci="call" href="' + esc(telLink(p.contact.phone)) + '">📞 Call ' + cname + '</a>' +
           '<button type="button" class="btn secondary big" data-ci="ride">🚗 Get a ride home</button>' +
           '<button type="button" class="btn ghost" data-ci="close">I’m safe — close</button>' +
+          emergencyBtn() +
         '</div>' +
         (!pushed && c.pushTried ? '<p class="tiny muted">The encrypted alert couldn’t be delivered (no connection?). Use the SMS or WhatsApp button above.</p>' : '') +
         (pushed ? '<p class="tiny muted">' + cname + ' got a notification saying you may need help. The details above were end-to-end encrypted.</p>' : '') +
@@ -900,7 +920,7 @@
         '<p class="muted">You chose not to auto-alert anyone. If you need a hand getting home, it’s all right here.</p>' +
         planHtml(p, getNight(), 'the check-in') +
         '<div class="ci-actions"><button type="button" class="btn primary big" data-ci="ride">🚗 Get a ride home</button>' + contactBtns +
-        '<button type="button" class="btn ghost" data-ci="close">Close</button></div>';
+        '<button type="button" class="btn ghost" data-ci="close">Close</button>' + emergencyBtn() + '</div>';
     }
     // responded
     return '<div class="ci-icon" aria-hidden="true">💙</div>' +
@@ -967,6 +987,8 @@
       closeCheckin();
     } else if (act === 'thanks') {
       sendThanks();
+    } else if (act === '112') {
+      confirmEmergency();
     }
   }
 
@@ -1310,6 +1332,7 @@
         '<p class="form-error" role="alert"></p>' +
         '<button class="btn primary big full" type="submit">Save changes</button>' +
       '</fieldset></form>' +
+      homeCard(p, locked) +
       contactLinkCard(p, locked) +
       '<section class="card"><h2>Use it in WhatsApp, Instagram &amp; Gmail</h2>' +
         '<p class="muted">The SecondLook browser extension (Chrome or Edge) gives the same second look on WhatsApp Web, Instagram DMs and Gmail. Paste this code into the extension’s popup. It holds timing numbers and your settings — never messages.</p>' +
@@ -1329,6 +1352,7 @@
     if (unlockBtn) unlockBtn.addEventListener('click', function () { openUnlock(function () { renderView(false); }); });
 
     wireContactLinkCard(root);
+    wireHomeCard(root);
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -1628,6 +1652,44 @@
       else x.reminders.push({ at: Date.now() - 1000, status: 'pending' });
     });
     if (n) { log('night', '[Demo] Triggered a Night Out check-in reminder.'); nightTick(); }
+  }
+
+  function homeCard(p, locked) {
+    var has = p.home && R.hasCoords(p.home);
+    return '<section class="card" id="home-card"><h2>One-tap ride home</h2>' +
+      '<p class="muted">' + (p.homeAddress ? 'Home address: <b>' + esc(p.homeAddress) + '</b>. ' : 'No home address yet — add it above. ') +
+      (has ? 'Home location saved ✓ — Uber opens with home as the destination.' : 'Save your home location once (while you’re at home) so Uber can open with home filled in. For Ola and Rapido we copy your address to paste.') + '</p>' +
+      '<p class="small muted">Your location is read by your browser and stored only on this device.</p>' +
+      '<div class="row-btns"><button type="button" class="btn secondary" id="home-here"' + (locked ? ' disabled' : '') + '>📍 I’m at home — save this location</button>' +
+      (has ? '<button type="button" class="btn ghost" id="home-clear"' + (locked ? ' disabled' : '') + '>Forget home location</button>' : '') + '</div>' +
+      '<p class="form-error" id="home-err" role="alert"></p></section>';
+  }
+
+  function wireHomeCard(root) {
+    var here = $('#home-here', root), clear = $('#home-clear', root);
+    if (here) here.addEventListener('click', function () {
+      var err = $('#home-err', root);
+      if (!navigator.geolocation) { err.textContent = 'This browser can’t share location.'; return; }
+      here.disabled = true;
+      navigator.geolocation.getCurrentPosition(function (pos) {
+        var p = getProfile();
+        p.home = { lat: Number(pos.coords.latitude.toFixed(5)), lng: Number(pos.coords.longitude.toFixed(5)), at: Date.now() };
+        saveProfile(p);
+        log('settings', 'You saved your home location for one-tap Uber rides (stored only on this device).');
+        toast('Home location saved ✓');
+        renderView(false);
+      }, function () {
+        here.disabled = false;
+        err.textContent = location.protocol === 'file:' ? 'Location needs SecondLook to be opened over https (or npm start).' : 'Couldn’t get your location — allow location for this site and try again.';
+      }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+    });
+    if (clear) clear.addEventListener('click', function () {
+      var p = getProfile();
+      delete p.home;
+      saveProfile(p);
+      log('settings', 'You removed your saved home location.');
+      renderView(false);
+    });
   }
 
   function contactLinkCard(p, locked) {
