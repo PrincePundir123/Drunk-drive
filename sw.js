@@ -1,5 +1,5 @@
 /* SecondLook service worker: network first, cache as offline fallback. */
-var CACHE = 'secondlook-v10';
+var CACHE = 'secondlook-v11';
 var ASSETS = [
   './', './index.html', './contact.html', './study.html', './manifest.webmanifest',
   './css/tokens.css', './css/style.css',
