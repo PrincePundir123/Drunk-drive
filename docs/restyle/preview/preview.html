@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Restyle preview</title>
+<style>
+@font-face { font-family: "Outfit"; src: url("../../../assets/fonts/outfit-var.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Atkinson Hyperlegible"; src: url("../../../assets/fonts/atkinson-hyperlegible-400.woff2") format("woff2"); font-weight: 400; }
+@font-face { font-family: "Atkinson Hyperlegible"; src: url("../../../assets/fonts/atkinson-hyperlegible-700.woff2") format("woff2"); font-weight: 700; }
+:root, [data-mode="day"] {
+  --bg: #FFFDF9; --surface: #FFFFFF; --surface-2: #FAF7F4; --line: #EEE8E3;
+  --text: #2C2C2C; --text-2: #6B6865; --accent: #C63D1F; --accent-ink: #FFFFFF; --accent-bright: #FF6B4A;
+  --accent-soft: #FFF5F3; --pill-ink: #A8391F; --link: #C63D1F;
+  --font: "Outfit", "Segoe UI", system-ui, sans-serif; --body: "Outfit", "Segoe UI", system-ui, sans-serif;
+  --fs-body: 17px;
+}
+[data-mode="night"] {
+  --bg: #1C1917; --surface: #292524; --surface-2: #3A3431; --line: #4A433E;
+  --text: #FFFDF9; --text-2: #D6D0CB; --accent: #FFA58E; --accent-ink: #1C1917; --link: #FFB4A2;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif; --fs-body: 20px;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: var(--fs-body)/1.55 var(--body); }
+h1, h2, b.t { font-family: var(--font); font-weight: 600; letter-spacing: -.03em; line-height: 1.05; margin: 0; }
+p { margin: 0; }
+.eye { overflow: visible; }
+.eye .shape { fill: var(--surface); } .eye .out { fill: none; stroke: var(--text); stroke-width: 3; }
+.eye .track { fill: none; stroke: var(--line); stroke-width: 5; } .eye .iris { fill: none; stroke: var(--link); stroke-width: 5; stroke-linecap: round; }
+.eye .pupil { fill: var(--link); } .eye .bar { fill: var(--surface); }
+
+/* ---------- shell */
+.top { display: flex; align-items: center; gap: 12px; height: 76px; padding: 0 24px; border-bottom: 1px solid var(--line); background: var(--bg); }
+.logo { display: inline-flex; align-items: center; gap: 12px; font: 600 22px var(--font); letter-spacing: -.03em; color: var(--text); }
+.tile { width: 44px; height: 44px; border-radius: 12px; background: var(--accent-bright); display: grid; place-items: center; }
+.tile svg { width: 30px; height: 20px; }
+.tile .out { stroke: #FFF; } .tile .shape { fill: var(--accent-bright); } .tile .pupil { fill: #FFF; } .tile .bar { fill: var(--accent-bright); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 24px; border-radius: 12px; border: 1px solid transparent; font: 600 17px var(--font); cursor: pointer; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); box-shadow: 0 8px 20px rgba(255, 107, 74, .28); }
+.btn.secondary { background: var(--surface); color: var(--text); border-color: var(--line); }
+.top .btn { margin-left: auto; min-height: 48px; }
+.pill { display: inline-flex; align-items: center; min-height: 36px; padding: 0 16px; border-radius: 999px; background: var(--accent-soft); color: var(--pill-ink); border: 1px solid #FCDCD4; font: 600 15px var(--font); }
+
+/* ---------- landing hero */
+.hero { position: relative; text-align: center; padding: 64px 16px 72px; overflow: hidden; }
+.hero::before { content: ""; position: absolute; left: 50%; top: -140px; width: 900px; height: 520px; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(255, 107, 74, .16), rgba(214, 170, 255, .10) 55%, transparent); pointer-events: none; }
+.hero > * { position: relative; }
+.hero h1 { font-size: clamp(40px, 26px + 4.2vw, 76px); letter-spacing: -.04em; max-width: 13ch; margin: 20px auto 20px; color: #2C2C2C; }
+.hero .lead { font-size: clamp(18px, 16px + .5vw, 22px); line-height: 1.6; color: var(--text-2); max-width: 36em; margin: 0 auto; }
+.tool { max-width: 1080px; margin: 44px auto 0; background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 28px; display: grid; gap: 28px; text-align: left; }
+@media (min-width: 900px) { .tool { grid-template-columns: 300px 1fr; align-items: center; padding: 36px; } }
+.phone { width: 100%; max-width: 280px; margin: 0 auto; aspect-ratio: 9/16; border-radius: 34px; border: 9px solid #1C1917; background: #1C1917; color: #FFFDF9; overflow: hidden; display: flex; flex-direction: column; font: 15px/1.35 "Outfit", sans-serif; position: relative; }
+.phone .ph { padding: 14px; border-bottom: 1px solid #3A3431; display: flex; gap: 8px; align-items: center; }
+.phone .av { width: 28px; height: 28px; border-radius: 50%; background: #FF8A73; color: #1C1917; display: grid; place-items: center; font-weight: 700; font-size: 13px; }
+.phone .pb { margin: 0 12px 8px; align-self: flex-start; background: #3A3431; padding: 7px 11px; border-radius: 14px; }
+.phone .sp { flex: 1; }
+.phone .sheet { background: #292524; border-top: 3px solid #FFA58E; border-radius: 18px 18px 0 0; padding: 14px; }
+.phone .sheet b { display: block; font-size: 17px; margin: 4px 0 2px; }
+.phone .sheet p { color: #D6D0CB; font-size: 13px; margin-bottom: 10px; }
+.phone .fb { display: block; text-align: center; border-radius: 10px; padding: 9px; font-weight: 600; background: #FFA58E; color: #1C1917; margin-bottom: 6px; }
+.phone .fb.alt { background: transparent; color: #FFFDF9; border: 1px solid #4A433E; }
+.drop { border: 1.5px dashed rgba(255, 107, 74, .55); background: #FFFAF8; border-radius: 16px; padding: 28px 20px; text-align: center; }
+.drop .circ { width: 56px; height: 56px; border-radius: 50%; background: var(--accent-bright); display: grid; place-items: center; margin: 0 auto 14px; }
+.drop .circ svg { width: 26px; height: 26px; stroke: #FFF; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.drop b { display: block; font: 600 20px var(--font); margin-bottom: 4px; }
+.drop p { color: var(--text-2); font-size: 15px; }
+.note { color: var(--text-2); font-size: 15px; margin: 16px 0; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.note span::before { content: "✓ "; color: var(--accent); font-weight: 700; }
+.row { display: grid; gap: 12px; }
+@media (min-width: 560px) { .row { grid-template-columns: 1fr 1fr; } }
+.row .btn { min-height: 56px; }
+
+/* ---------- night screens */
+.stage { display: grid; gap: 40px; padding: 48px 16px; background: #F3EFEA; justify-content: center; grid-template-columns: repeat(auto-fit, minmax(0, 390px)); }
+.frame { width: 100%; max-width: 390px; height: 780px; border-radius: 28px; overflow: hidden; position: relative; background: var(--bg); color: var(--text); border: 1px solid #E5DED8; }
+.cap { font: 600 15px var(--font); color: #6B6865; margin: 0 0 10px; }
+.chatbg { position: absolute; inset: 0; background: #1C1917; }
+.chatbg .top { border-color: #4A433E; }
+.scrim { position: absolute; inset: 0; background: rgba(0, 0, 0, .6); }
+.sheet2 { position: absolute; left: 0; right: 0; bottom: 0; background: var(--bg); border-radius: 24px 24px 0 0; border-top: 3px solid var(--accent); padding: 12px 20px 24px; }
+.grip { width: 44px; height: 5px; background: var(--line); border-radius: 9px; margin: 0 auto 16px; }
+.sheet2 h2 { font-size: 32px; margin: 8px 0 10px; }
+.quote { background: var(--surface); border-radius: 14px; padding: 10px 14px; margin-bottom: 12px; }
+.muted { color: var(--text-2); }
+.plan { border: 2px solid var(--link); border-radius: 16px; padding: 12px 16px; margin: 14px 0; background: var(--surface); }
+.plan small { display: block; color: var(--text-2); font-size: 16px; }
+.plan b { font: 600 22px/1.25 var(--font); }
+.count { margin: 14px 0 16px; }
+.count p { font-size: 17px; color: var(--text-2); margin-bottom: 8px; }
+.tbar { height: 8px; background: var(--surface-2); border-radius: 9px; overflow: hidden; }
+.tbar span { display: block; width: 62%; height: 100%; background: var(--link); }
+.big { width: 100%; min-height: 64px; font-size: 22px; border-radius: 14px; }
+[data-mode="night"] .btn.primary { box-shadow: none; }
+[data-mode="night"] .btn.secondary { background: transparent; border: 1.5px solid var(--line); color: var(--text); min-height: 56px; font-size: 19px; width: 100%; margin-top: 10px; }
+.ci { display: flex; flex-direction: column; height: 100%; padding: 16px 20px 0; }
+.ci-top { display: flex; justify-content: space-between; align-items: center; }
+.ci-top .logo { font-size: 18px; color: var(--text-2); }
+.ci-top .tile { width: 36px; height: 36px; } .ci-top .tile svg { width: 24px; height: 16px; }
+.e112 { min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1.5px solid var(--line); background: transparent; color: var(--text); font: 600 17px var(--font); }
+.ci-main { flex: 1; padding-top: 24px; }
+.ring { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
+.ring .eye { width: 96px; height: 61px; }
+.num { font: 600 64px/1 var(--font); letter-spacing: -.04em; }
+.num small { display: block; font: 16px var(--body); color: var(--text-2); letter-spacing: 0; }
+.ci h2 { font-size: 32px; margin-bottom: 8px; }
+.ci-act { border-top: 1px solid var(--line); padding: 16px 0 22px; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pair .btn.secondary { margin-top: 10px; }
+</style>
+</head>
+<body data-mode="day">
+<section id="landing">
+  <header class="top">
+    <span class="logo"><span class="tile"><svg class="eye" viewBox="0 0 120 76" aria-hidden="true"><path class="shape" d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z"/><circle class="pupil" cx="60" cy="38" r="14"/><rect class="bar" x="54" y="31" width="4.5" height="14" rx="2"/><rect class="bar" x="61.5" y="31" width="4.5" height="14" rx="2"/><path class="out" stroke-width="7" d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z"/></svg></span>SecondLook</span>
+    <button class="btn primary">Try the demo</button>
+  </header>
+  <div class="hero">
+    <span class="pill">A promise you make while sober</span>
+    <h1>The pause before a bad decision.</h1>
+    <p class="lead">Drinking breaks the very judgment you'd need to notice you're too drunk to drive. SecondLook lets you make the call while you're sober, then keeps that promise for you later tonight.</p>
+    <div class="tool">
+      <div class="phone" aria-hidden="true">
+        <div class="ph"><span class="av">J</span><b>Jordan</b></div>
+        <div class="sp"></div>
+        <p class="pb">are u still at the party?</p>
+        <p class="pb">how r u getting home</p>
+        <div class="sheet"><b>Want a second look?</b><p>This doesn't look like how you usually text.</p><span class="fb">Edit my message</span><span class="fb alt">Send it anyway</span></div>
+      </div>
+      <div>
+        <div class="drop">
+          <div class="circ"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></div>
+          <b>See it work in 2 minutes</b>
+          <p>Loads a sample night with a practice chat. Nothing is sent to anyone.</p>
+        </div>
+        <p class="note"><span>Free</span><span>Runs in your browser</span><span>Your words stay on your phone</span></p>
+        <div class="row">
+          <button class="btn primary">Try the 2-minute demo</button>
+          <button class="btn secondary">Set up SecondLook</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stage" id="night">
+  <div>
+    <p class="cap">Second-look prompt (Night Mode)</p>
+    <div class="frame" data-mode="night">
+      <div class="chatbg"><div class="top"><span class="logo" style="font-size:18px">Jordan</span></div></div>
+      <div class="scrim"></div>
+      <div class="sheet2" role="dialog" aria-label="Want a second look?">
+        <div class="grip"></div>
+        <svg class="eye" viewBox="0 0 120 76" width="64" height="41" aria-hidden="true"><path class="shape" d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z"/><circle class="track" cx="60" cy="38" r="19"/><circle class="iris" cx="60" cy="38" r="19" stroke-dasharray="119.4" stroke-dashoffset="45" transform="rotate(-90 60 38)"/><circle class="pupil" cx="60" cy="38" r="10"/><rect class="bar" x="55.5" y="33" width="3" height="10" rx="1.5"/><rect class="bar" x="61.5" y="33" width="3" height="10" rx="1.5"/><path class="out" d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z"/></svg>
+        <h2>Want a second look?</h2>
+        <p class="quote">“heyy im fnie cna drive hme lol”</p>
+        <p class="muted">This doesn't look like how you usually text.</p>
+        <div class="plan"><small>You said tonight</small><b>“Don't drive, Alex. Seriously.”</b></div>
+        <div class="count" aria-live="polite"><p>Sending anyway in <b style="color:var(--text)">28s</b></p><div class="tbar"><span></span></div></div>
+        <button class="btn primary big">Edit my message</button>
+        <button class="btn secondary">Send it anyway</button>
+      </div>
+    </div>
+  </div>
+  <div>
+    <p class="cap">Check-in (Night Mode)</p>
+    <div class="frame" data-mode="night">
+      <div class="ci">
+        <div class="ci-top"><span class="logo"><span class="tile"><svg class="eye" viewBox="0 0 120 76" aria-hidden="true"><path class="shape" d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z"/><circle class="pupil" cx="60" cy="38" r="14"/><rect class="bar" x="54" y="31" width="4.5" height="14" rx="2"/><rect class="bar" x="61.5" y="31" width="4.5" height="14" rx="2"/><path class="out" stroke-width="7" d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z"/></svg></span>SecondLook</span><button class="e112">Call 112</button></div>
+        <div class="ci-main">
+          <div class="ring" aria-live="polite"><svg class="eye" viewBox="0 0 120 76" aria-hidden="true"><path class="shape" d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z"/><circle class="track" cx="60" cy="38" r="19"/><circle class="iris" cx="60" cy="38" r="19" stroke-dasharray="119.4" stroke-dashoffset="30" transform="rotate(-90 60 38)"/><circle class="pupil" cx="60" cy="38" r="10"/><rect class="bar" x="55.5" y="33" width="3" height="10" rx="1.5"/><rect class="bar" x="61.5" y="33" width="3" height="10" rx="1.5"/><path class="out" d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z"/></svg><span class="num">28<small>seconds</small></span></div>
+          <h2>Hey Alex. Just checking in.</h2>
+          <p class="muted" style="font-size:17px">If you don't answer, Priya gets a message, like you agreed while sober.</p>
+          <div class="plan"><small>You planned to take an Uber home</small><b>“Don't drive, Alex. Seriously.”</b></div>
+          <p class="muted" style="font-size:16px">Why now: you didn't respond to a second-look prompt.</p>
+        </div>
+        <div class="ci-act">
+          <button class="btn primary big">Open Uber, like you planned</button>
+          <div class="pair"><button class="btn secondary">Call Priya</button><button class="btn secondary">Text Priya</button></div>
+          <button class="btn secondary" style="border:0;text-decoration:underline;color:var(--link)">I'm okay: take a 15-second test</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</body>
+</html>
