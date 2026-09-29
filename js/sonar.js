@@ -1,5 +1,5 @@
 /* SecondLook — sonar grid background.
- * A vanilla-JS port of the SonarGrid component: a decorative dot field that answers taps
+ * A vanilla-JS port of the SonarGrid component: a decorative field of square pixels that answers taps
  * with expanding rings. It fills the viewport behind all content (fixed, so the grid never
  * shifts while you scroll), reads its colour from the theme (the accent of the current
  * Sober/Night mode), idles when no ring is alive, pauses in hidden tabs, and draws a still
@@ -8,7 +8,6 @@
   'use strict';
 
   var MAX_DPR = 2;
-  var TAU = Math.PI * 2;
 
   var DEFAULTS = {
     spacing: 26,          // distance between dots, CSS px
@@ -74,8 +73,7 @@
         var cx = grid.offsetX + i * o.spacing;
         for (var j = 0; j < grid.rows; j++) {
           var cy = grid.offsetY + j * o.spacing;
-          stillCtx.moveTo(cx + o.dotRadius, cy);
-          stillCtx.arc(cx, cy, o.dotRadius, 0, TAU);
+          stillCtx.rect(cx - o.dotRadius, cy - o.dotRadius, o.dotRadius * 2, o.dotRadius * 2);
         }
       }
       stillCtx.fill();
@@ -113,9 +111,8 @@
             var e = t * t * (3 - 2 * t) * fade; // smoothstep, fading with age
             if (e < 0.01) continue;
             ctx.globalAlpha = (o.maxOpacity - o.baseOpacity) * e;
-            ctx.beginPath();
-            ctx.arc(cx, cy, o.dotRadius * (1 + o.amplitude * e), 0, TAU);
-            ctx.fill();
+            var rr = o.dotRadius * (1 + o.amplitude * e);
+            ctx.fillRect(cx - rr, cy - rr, rr * 2, rr * 2);
           }
         }
       }

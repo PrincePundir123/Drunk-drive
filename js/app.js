@@ -255,8 +255,9 @@
     var night = appReady && ['home', 'chat', 'check'].indexOf(v) >= 0 && !!(getNight() || recentFlags(LOCK_WINDOW).length);
     document.body.setAttribute('data-mode', night ? 'night' : 'day');
     var meta = $('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', night ? '#111317' : '#F2F4F1');
+    if (meta) meta.setAttribute('content', night ? '#0A0A0F' : '#F2F2F2');
     $('#demo-badge').hidden = !(p && p.demo);
+    $('#bar-cta').hidden = v !== 'welcome';
     var section = $('[data-view="' + v + '"]');
     var render = RENDER[v];
     if (render) viewCleanup = render(section) || null;
@@ -1458,7 +1459,7 @@
     var groups = [['set-you', 'You and your contact'], ['set-rides', 'Rides home'], ['set-alerts', 'Alerts to your contact'], ['set-ext', 'Browser extension'], ['set-baseline', 'Baseline'], ['set-data', 'Your data']];
     root.innerHTML = '<div class="page wide">' +
       '<h1>Settings</h1>' +
-      (locked ? '<div class="lock-band lock" role="status">' + ico('lock') + '<div><h2>Locked' + (unlockAt ? ' until ' + esc(unlockAt) : ' for now') + '</h2>' +
+      (locked ? '<div class="lock-band lock" data-mode="night" role="status">' + ico('lock') + '<div><h2>Locked' + (unlockAt ? ' until ' + esc(unlockAt) : ' for now') + '</h2>' +
         '<p>Something was flagged tonight, so the rules you set while sober can’t be changed right now. That’s the point: a drunk you can’t quietly switch them off.</p>' +
         '<button type="button" class="btn primary" id="unlock">' + ico('unlock') + 'Unlock with a 15-second test</button></div></div>' : '') +
       '<div class="settings">' +
@@ -1974,6 +1975,8 @@
   // ======================================================================
   // The landing page's one orchestrated moment: a message gets typed, then paused.
   function renderWelcome(root) {
+    // decorative: pixel planets and settling headlines (the page works without them)
+    try { if (window.SLPixel) { window.SLPixel.settleAll(root); requestAnimationFrame(function () { window.SLPixel.paint(root); }); } } catch (e) { /* ignore */ }
     var phone = $('.phone', root);
     if (!phone) return null;
     var compose = $('#pc-text', root), sheet = $('.phone-sheet', root), replay = $('.replay', root), quote = $('#pc-quote', root);
