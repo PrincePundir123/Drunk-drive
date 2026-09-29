@@ -170,20 +170,20 @@
         }
       }
       if (path) {
-        ctx.strokeStyle = 'rgba(245,245,247,0.14)';
+        ctx.strokeStyle = 'rgba(255,253,249,0.14)';
         ctx.lineWidth = 2;
         ctx.stroke(path);
       }
       var p = target(t);
       var g = ctx.createRadialGradient(p.x, p.y, 2, p.x, p.y, 30);
-      g.addColorStop(0, 'rgba(123,123,255,0.55)');
-      g.addColorStop(1, 'rgba(123,123,255,0)');
+      g.addColorStop(0, 'rgba(255,165,142,0.55)');
+      g.addColorStop(1, 'rgba(255,165,142,0)');
       ctx.fillStyle = g;
       ctx.beginPath(); ctx.arc(p.x, p.y, 30, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#7B7BFF';
+      ctx.fillStyle = '#FFA58E';
       ctx.beginPath(); ctx.arc(p.x, p.y, 13, 0, Math.PI * 2); ctx.fill();
       if (pointer && running) {
-        ctx.strokeStyle = '#F5F5F7';
+        ctx.strokeStyle = '#FFFDF9';
         ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(pointer.x, pointer.y, 7, 0, Math.PI * 2); ctx.stroke();
       }
