@@ -1,8 +1,9 @@
 /* SecondLook design tokens.
- * Two modes of one product:
- *   Sober Mode ("daylight")  – planning: calm, clear, a little more detail.
- *   Night Mode ("streetlight") – the prompt, check-in, alert, reminders, contact view:
- *     one action, big thumb targets, large legible type, AAA contrast.
+ * Look: light grey canvas, white rounded cards, bold black sections, one electric-blue
+ * accent and blue pixel artwork. Two modes of one product:
+ *   Sober Mode  – planning: calm, clear, a little more detail.
+ *   Night Mode  – the prompt, check-in, alert, reminders, contact view: one action,
+ *                 big thumb targets, large legible type, AAA contrast.
  * Components only use the semantic tokens (--bg, --text, --accent, …); putting
  * data-mode="night" on any element re-themes everything inside it. */
 
@@ -17,43 +18,46 @@
   font-weight: 700; font-style: normal; font-display: swap;
 }
 @font-face {
-  font-family: "Bricolage Grotesque";
-  src: url("../assets/fonts/bricolage-grotesque-var.woff2") format("woff2");
-  font-weight: 200 800; font-style: normal; font-display: swap;
+  font-family: "Geist";
+  src: url("../assets/fonts/geist-var.woff2") format("woff2");
+  font-weight: 100 900; font-style: normal; font-display: swap;
 }
 
 :root {
-  /* ---- raw palette: daylight ---- */
-  --c-paper: #F2F4F1;
-  --c-surface: #FFFFFF;
-  --c-surface-2: #E7EBE7;
-  --c-line: #D3DAD5;
-  --c-ink: #152019;
-  --c-ink-2: #4A5650;
-  --c-dusk: #2F3E9E;
-  --c-dusk-soft: #E3E6F6;
-  --c-ok: #1E6B45;
-  --c-ok-soft: #DDEFE4;
-  --c-warn: #8A5300;
-  --c-warn-soft: #F6E9D2;
-  --c-danger: #A8231B;
-  --c-danger-soft: #F7E1DE;
+  /* ---- raw palette: day ---- */
+  --c-canvas: #F2F2F2;      /* page */
+  --c-white: #FFFFFF;       /* cards */
+  --c-card-2: #F7F7F8;      /* stat tiles inside cards */
+  --c-line: #E2E2E6;
+  --c-ink: #0A0A0F;         /* 18:1 on canvas */
+  --c-ink-2: #55555F;       /* 6.6:1 */
+  --c-blue: #1F1FFF;        /* the one accent: 7:1 on canvas, white on it 7.8:1 */
+  --c-blue-soft: #E6E6FF;
+  --c-ok: #067A4E;
+  --c-ok-soft: #DDF3E8;
+  --c-warn: #9A4A00;
+  --c-warn-soft: #FBEBD7;
+  --c-danger: #C0171B;
+  --c-danger-soft: #FBE1E1;
 
-  /* ---- raw palette: streetlight ---- */
-  --c-night: #111317;
-  --c-night-surface: #1B1E24;
-  --c-night-raise: #262A32;
-  --c-night-line: #3A3F4A;
-  --c-night-ink: #F4EFE6;
-  --c-night-ink-2: #C9C1B3;
-  --c-amber: #FFBE55;
-  --c-amber-ink: #1A1204;
-  --c-night-ok: #8EDDB0;
-  --c-night-danger: #FF9E8F;
+  /* ---- raw palette: night (and the black sections) ---- */
+  --c-black: #0A0A0F;
+  --c-black-card: #17171F;
+  --c-black-raise: #22222C;
+  --c-black-line: #34343F;
+  --c-snow: #F5F5F7;        /* 18:1 on black */
+  --c-snow-2: #B9B9C6;      /* 10:1 AAA */
+  --c-blue-night: #2B2BFF;  /* white on it 7.3:1 AAA */
+  --c-blue-glow: #A5A5FF;   /* links/text on black 8.9:1 AAA */
+  --c-ok-night: #7EE8B6;
+  --c-warn-night: #FFC861;
+  --c-danger-night: #FF9E96;
 
   /* ---- type ---- */
   --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
-  --font-display: "Bricolage Grotesque", "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Geist", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  --track-tight: -0.045em;  /* the big, tightly set headlines */
+  --fs-hero: clamp(2.5rem, 1.2rem + 5.4vw, 5.75rem);  /* landing headlines, same in both modes */
 
   /* ---- space (4px base) ---- */
   --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
@@ -61,7 +65,7 @@
   --gutter: 16px;
 
   /* ---- radius ---- */
-  --r-1: 8px; --r-2: 14px; --r-3: 22px; --r-pill: 999px;
+  --r-1: 8px; --r-2: 14px; --r-3: 22px; --r-btn: 6px; --r-pill: 999px;
 
   /* ---- motion ---- */
   --t-fast: 120ms;
@@ -70,75 +74,79 @@
   --ease-out: cubic-bezier(.2, .8, .2, 1);
 
   /* ---- layout ---- */
-  --w-page: 1120px;
-  --w-read: 680px;
+  --w-page: 1180px;
+  --w-read: 720px;
   --w-night: 520px;
-  --header-h: 60px;
+  --header-h: 88px;
   --tabbar-h: 68px;
 }
 
 /* ---------- Sober Mode (default) ---------- */
 :root,
 [data-mode="day"] {
-  --bg: var(--c-paper);
-  --surface: var(--c-surface);
-  --surface-2: var(--c-surface-2);
+  --bg: var(--c-canvas);
+  --surface: var(--c-white);
+  --surface-2: var(--c-card-2);
   --line: var(--c-line);
   --text: var(--c-ink);
   --text-2: var(--c-ink-2);
-  --accent: var(--c-dusk);
+  --accent: var(--c-blue);
   --accent-ink: #FFFFFF;
-  --accent-soft: var(--c-dusk-soft);
+  --accent-soft: var(--c-blue-soft);
+  --accent-edge: var(--c-blue);
+  --link: var(--c-blue);
   --ok: var(--c-ok);
   --ok-soft: var(--c-ok-soft);
   --warn: var(--c-warn);
   --warn-soft: var(--c-warn-soft);
   --danger: var(--c-danger);
   --danger-soft: var(--c-danger-soft);
-  --focus: var(--c-dusk);
-  --scrim: rgba(21, 32, 25, .45);
+  --focus: var(--c-blue);
+  --scrim: rgba(10, 10, 15, .5);
 
   --heading: var(--font-display);
   --fs-sm: .875rem;       /* 14 */
   --fs-body: 1.0625rem;   /* 17 */
   --fs-lead: 1.25rem;     /* 20 */
-  --fs-h2: 1.5rem;        /* 24 */
-  --fs-h1: clamp(2.125rem, 1.7rem + 1.6vw, 3rem);     /* 34 → 48 */
-  --fs-display: clamp(2.6rem, 1.6rem + 4.2vw, 4.5rem); /* 42 → 72 */
+  --fs-h2: clamp(1.75rem, 1.3rem + 1.6vw, 2.75rem);   /* 28 → 44 */
+  --fs-h1: clamp(2.25rem, 1.6rem + 2.6vw, 3.5rem);    /* 36 → 56 */
+  --fs-display: clamp(2.75rem, 1.4rem + 6vw, 6rem);   /* 44 → 96 */
   --lh: 1.55;
 
   --tap-min: 48px;
-  --tap-primary: 52px;
+  --tap-primary: 56px;
   color-scheme: light;
 }
 
-/* ---------- Night Mode ---------- */
+/* ---------- Night Mode (also the black sections) ---------- */
 [data-mode="night"] {
-  --bg: var(--c-night);
-  --surface: var(--c-night-surface);
-  --surface-2: var(--c-night-raise);
-  --line: var(--c-night-line);
-  --text: var(--c-night-ink);
-  --text-2: var(--c-night-ink-2);
-  --accent: var(--c-amber);
-  --accent-ink: var(--c-amber-ink);
-  --accent-soft: rgba(255, 190, 85, .14);
-  --ok: var(--c-night-ok);
-  --ok-soft: rgba(142, 221, 176, .14);
-  --warn: var(--c-amber);
-  --warn-soft: rgba(255, 190, 85, .14);
-  --danger: var(--c-night-danger);
-  --danger-soft: rgba(255, 158, 143, .14);
-  --focus: var(--c-amber);
-  --scrim: rgba(0, 0, 0, .6);
+  --bg: var(--c-black);
+  --surface: var(--c-black-card);
+  --surface-2: var(--c-black-raise);
+  --line: var(--c-black-line);
+  --text: var(--c-snow);
+  --text-2: var(--c-snow-2);
+  --accent: var(--c-blue-night);
+  --accent-ink: #FFFFFF;
+  --accent-soft: rgba(43, 43, 255, .22);
+  --accent-edge: #7B7BFF;   /* 3:1+ outline so blue buttons stand out on black */
+  --link: var(--c-blue-glow);
+  --ok: var(--c-ok-night);
+  --ok-soft: rgba(126, 232, 182, .14);
+  --warn: var(--c-warn-night);
+  --warn-soft: rgba(255, 200, 97, .14);
+  --danger: var(--c-danger-night);
+  --danger-soft: rgba(255, 158, 150, .14);
+  --focus: var(--c-blue-glow);
+  --scrim: rgba(0, 0, 0, .65);
 
-  --heading: var(--font-body);      /* at night, legibility beats personality */
+  --heading: var(--font-display);
   --fs-sm: 1rem;          /* 16 */
   --fs-body: 1.25rem;     /* 20 */
   --fs-lead: 1.5rem;      /* 24 */
   --fs-h2: 1.75rem;       /* 28 */
   --fs-h1: 2rem;          /* 32 */
-  --fs-display: 4.5rem;   /* 72 – countdown numerals */
+  --fs-display: 4.5rem;   /* 72: countdown numerals */
   --lh: 1.45;
 
   --tap-min: 56px;
