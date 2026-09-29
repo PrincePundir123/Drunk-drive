@@ -2039,6 +2039,18 @@
     route();
     showCheckin();
 
+    // Decorative sonar background. It's quiet while a check-in covers the screen, and it
+    // must never break the app, so any failure here is ignored.
+    // Created only once the page has loaded and the browser is idle: it's decoration, so it
+    // must never compete with the first paint or the first tap.
+    function startSonar() {
+      try {
+        if (window.SLSonar) window.SLSonar.create({ spacing: 28, dotRadius: 1.3, baseOpacity: 0.2, maxOpacity: 0.6, amplitude: 1.6, startDelay: 1200, pauseWhen: function () { return document.body.classList.contains('no-scroll'); } });
+      } catch (e) { /* the app works without it */ }
+    }
+    function whenIdle() { if ('requestIdleCallback' in window) window.requestIdleCallback(startSonar, { timeout: 3000 }); else setTimeout(startSonar, 1500); }
+    if (document.readyState === 'complete') whenIdle(); else window.addEventListener('load', whenIdle);
+
     // Night Out reminders (the tab may be throttled in the background; we also check on return).
     setInterval(nightTick, 5000);
     document.addEventListener('visibilitychange', function () { if (!document.hidden) nightTick(); });

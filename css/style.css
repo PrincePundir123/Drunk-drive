@@ -15,6 +15,16 @@ body {
 body.has-tabbar { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom)); }
 body.no-scroll { overflow: hidden; }
 [hidden] { display: none !important; }
+
+/* Sonar grid background: fixed to the viewport behind all content, so it never shifts
+   while you scroll. Its dot colour is the current mode's accent (dusk by day, amber at night). */
+.sonar {
+  position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: -1; pointer-events: none; color: var(--accent);
+  /* quieter behind the central reading column, fuller at the edges, so text always stays clean */
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, rgba(0, 0, 0, .28) 30%, rgba(0, 0, 0, .28) 70%, #000 100%);
+          mask-image: linear-gradient(90deg, #000 0%, rgba(0, 0, 0, .28) 30%, rgba(0, 0, 0, .28) 70%, #000 100%);
+}
+body[data-mode="night"] .sonar { opacity: .7; }
 [data-boot="app"] [data-view="welcome"] { display: none; }
 img, svg { display: block; }
 p { margin: 0 0 var(--s-4); }
@@ -537,3 +547,12 @@ details.more > summary small { font-family: var(--font-body); font-size: var(--f
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* ================================================================ sonar background: solid bases */
+/* tinted panels sit on a solid base so the grid never shows through them */
+.demo-bar, .plan-card, .reply-banner, .lock-band, .warn, .task-guide, .choice:has(input:checked) { background-color: var(--bg) !important; }
+.demo-bar { background-image: linear-gradient(var(--warn-soft), var(--warn-soft)); }
+.plan-card { background-image: linear-gradient(var(--accent-soft), var(--accent-soft)); }
+.reply-banner { background-image: linear-gradient(var(--ok-soft), var(--ok-soft)); }
+.lock-band, .warn { background-image: linear-gradient(var(--warn-soft), var(--warn-soft)); }
+.task-guide, .choice:has(input:checked) { background-image: linear-gradient(var(--accent-soft), var(--accent-soft)); }
