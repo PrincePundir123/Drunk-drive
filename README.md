@@ -117,7 +117,7 @@ On a laptop, the browser extension adds the same second look to WhatsApp Web, In
 ## Demo video
 
 <p align="center">
-  <a href="https://www.youtube.com/watch?v=rpp4s6Ub9mg"><img src="https://img.youtube.com/vi/rpp4s6Ub9mg/hqdefault.jpg" alt="Watch the SecondLook demo on YouTube" width="640"></a><br>
+  <a href="https://www.youtube.com/watch?v=rpp4s6Ub9mg"><img src="docs/readme/video-cover.jpg" alt="Watch the SecondLook demo on YouTube" width="800"></a><br>
   <a href="https://www.youtube.com/watch?v=rpp4s6Ub9mg"><b>▶ Watch the demo on YouTube</b></a>
 </p>
 
