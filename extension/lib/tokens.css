@@ -1,9 +1,9 @@
 /* SecondLook design tokens.
- * Look: light grey canvas, white rounded cards, bold black sections, one electric-blue
- * accent and blue pixel artwork. Two modes of one product:
+ * Look: warm off-white canvas, white cards with hairlines, one coral accent, tinted pill
+ * labels, a geometric sans. Two modes of one product:
  *   Sober Mode  – planning: calm, clear, a little more detail.
- *   Night Mode  – the prompt, check-in, alert, reminders, contact view: one action,
- *                 big thumb targets, large legible type, AAA contrast.
+ *   Night Mode  – the prompt, check-in, alert, reminders, contact view: a warm-dark version,
+ *                 one action, big thumb targets, large legible type, AAA contrast.
  * Components only use the semantic tokens (--bg, --text, --accent, …); putting
  * data-mode="night" on any element re-themes everything inside it. */
 
@@ -18,46 +18,50 @@
   font-weight: 700; font-style: normal; font-display: swap;
 }
 @font-face {
-  font-family: "Geist";
-  src: url("../assets/fonts/geist-var.woff2") format("woff2");
+  font-family: "Outfit";
+  src: url("../assets/fonts/outfit-var.woff2") format("woff2");
   font-weight: 100 900; font-style: normal; font-display: swap;
 }
 
 :root {
   /* ---- raw palette: day ---- */
-  --c-canvas: #F2F2F2;      /* page */
+  --c-canvas: #FFFDF9;      /* warm page */
   --c-white: #FFFFFF;       /* cards */
-  --c-card-2: #F7F7F8;      /* stat tiles inside cards */
-  --c-line: #E2E2E6;
-  --c-ink: #0A0A0F;         /* 18:1 on canvas */
-  --c-ink-2: #55555F;       /* 6.6:1 */
-  --c-blue: #1F1FFF;        /* the one accent: 7:1 on canvas, white on it 7.8:1 */
-  --c-blue-soft: #E6E6FF;
-  --c-ok: #067A4E;
-  --c-ok-soft: #DDF3E8;
-  --c-warn: #9A4A00;
-  --c-warn-soft: #FBEBD7;
-  --c-danger: #C0171B;
-  --c-danger-soft: #FBE1E1;
+  --c-card-2: #FAF7F4;      /* icon tiles, stat tiles, input fill */
+  --c-line: #EEE8E3;        /* hairlines */
+  --c-ink: #2C2C2C;         /* 13.8:1 on canvas */
+  --c-ink-2: #6B6865;       /* 5.5:1 */
+  --c-coral: #C63D1F;       /* buttons + links: white on it 5.1:1 */
+  --c-coral-bright: #FF6B4A;/* decoration only (logo tile, icon circles, glow) */
+  --c-coral-soft: #FFF5F3;  /* active rows, pills, dropzone */
+  --c-coral-edge: #FCDCD4;  /* pill border */
+  --c-pill-ink: #A8391F;    /* 6.0:1 on the tint */
+  --c-ok: #1F7A4D;
+  --c-ok-soft: #E4F4EA;
+  --c-warn: #8A4B00;
+  --c-warn-soft: #FDF0DC;
+  --c-danger: #B42318;
+  --c-danger-soft: #FDE7E4;
 
-  /* ---- raw palette: night (and the black sections) ---- */
-  --c-black: #0A0A0F;
-  --c-black-card: #17171F;
-  --c-black-raise: #22222C;
-  --c-black-line: #34343F;
-  --c-snow: #F5F5F7;        /* 18:1 on black */
-  --c-snow-2: #B9B9C6;      /* 10:1 AAA */
-  --c-blue-night: #2B2BFF;  /* white on it 7.3:1 AAA */
-  --c-blue-glow: #A5A5FF;   /* links/text on black 8.9:1 AAA */
-  --c-ok-night: #7EE8B6;
-  --c-warn-night: #FFC861;
-  --c-danger-night: #FF9E96;
+  /* ---- raw palette: night (warm dark) ---- */
+  --c-dark: #1C1917;
+  --c-dark-card: #292524;
+  --c-dark-raise: #3A3431;
+  --c-dark-line: #4A433E;
+  --c-cream: #FFFDF9;       /* 17:1 on dark */
+  --c-cream-2: #D6D0CB;     /* 11.5:1 */
+  --c-coral-night: #FFA58E; /* buttons: dark text on it 9.2:1 */
+  --c-coral-glow: #FFB4A2;  /* links on dark 10.3:1 */
+  --c-ok-night: #8BE0B5;
+  --c-warn-night: #FFC56B;
+  --c-danger-night: #FFA89A;
 
   /* ---- type ---- */
-  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
-  --font-display: "Geist", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
-  --track-tight: -0.045em;  /* the big, tightly set headlines */
-  --fs-hero: clamp(2.5rem, 1.2rem + 5.4vw, 5.75rem);  /* landing headlines, same in both modes */
+  --font-body: "Outfit", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --font-display: "Outfit", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  --font-legible: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --track-tight: -0.03em;
+  --fs-hero: clamp(2.5rem, 1.6rem + 3.8vw, 4.75rem);  /* landing headlines, same in both modes */
 
   /* ---- space (4px base) ---- */
   --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
@@ -65,7 +69,10 @@
   --gutter: 16px;
 
   /* ---- radius ---- */
-  --r-1: 8px; --r-2: 14px; --r-3: 22px; --r-btn: 6px; --r-pill: 999px;
+  --r-1: 10px; --r-2: 16px; --r-3: 24px; --r-btn: 12px; --r-pill: 999px;
+
+  /* ---- shadow ---- */
+  --shadow-cta: 0 8px 20px rgba(255, 107, 74, .28);
 
   /* ---- motion ---- */
   --t-fast: 120ms;
@@ -74,10 +81,11 @@
   --ease-out: cubic-bezier(.2, .8, .2, 1);
 
   /* ---- layout ---- */
-  --w-page: 1180px;
-  --w-read: 720px;
+  --w-page: 1160px;
+  --w-read: 760px;
   --w-night: 520px;
-  --header-h: 88px;
+  --w-side: 248px;
+  --header-h: 76px;
   --tabbar-h: 68px;
 }
 
@@ -90,57 +98,67 @@
   --line: var(--c-line);
   --text: var(--c-ink);
   --text-2: var(--c-ink-2);
-  --accent: var(--c-blue);
+  --accent: var(--c-coral);
   --accent-ink: #FFFFFF;
-  --accent-soft: var(--c-blue-soft);
-  --accent-edge: var(--c-blue);
-  --link: var(--c-blue);
+  --accent-bright: var(--c-coral-bright);
+  --accent-soft: var(--c-coral-soft);
+  --accent-edge: var(--c-coral);
+  --pill-ink: var(--c-pill-ink);
+  --pill-edge: var(--c-coral-edge);
+  --link: var(--c-coral);
   --ok: var(--c-ok);
   --ok-soft: var(--c-ok-soft);
   --warn: var(--c-warn);
   --warn-soft: var(--c-warn-soft);
   --danger: var(--c-danger);
   --danger-soft: var(--c-danger-soft);
-  --focus: var(--c-blue);
-  --scrim: rgba(10, 10, 15, .5);
+  --focus: var(--c-coral);
+  --scrim: rgba(28, 25, 23, .5);
+  --btn-shadow: var(--shadow-cta);
 
   --heading: var(--font-display);
+  --body: var(--font-body);
   --fs-sm: .875rem;       /* 14 */
   --fs-body: 1.0625rem;   /* 17 */
   --fs-lead: 1.25rem;     /* 20 */
   --fs-h2: clamp(1.75rem, 1.3rem + 1.6vw, 2.75rem);   /* 28 → 44 */
-  --fs-h1: clamp(2.25rem, 1.6rem + 2.6vw, 3.5rem);    /* 36 → 56 */
-  --fs-display: clamp(2.75rem, 1.4rem + 6vw, 6rem);   /* 44 → 96 */
-  --lh: 1.55;
+  --fs-h1: clamp(2.125rem, 1.6rem + 2.2vw, 3.5rem);   /* 34 → 56 */
+  --fs-display: clamp(2.5rem, 1.6rem + 3.8vw, 4.75rem);
+  --lh: 1.6;
 
   --tap-min: 48px;
   --tap-primary: 56px;
   color-scheme: light;
 }
 
-/* ---------- Night Mode (also the black sections) ---------- */
+/* ---------- Night Mode (warm dark) ---------- */
 [data-mode="night"] {
-  --bg: var(--c-black);
-  --surface: var(--c-black-card);
-  --surface-2: var(--c-black-raise);
-  --line: var(--c-black-line);
-  --text: var(--c-snow);
-  --text-2: var(--c-snow-2);
-  --accent: var(--c-blue-night);
-  --accent-ink: #FFFFFF;
-  --accent-soft: rgba(43, 43, 255, .22);
-  --accent-edge: #7B7BFF;   /* 3:1+ outline so blue buttons stand out on black */
-  --link: var(--c-blue-glow);
+  --bg: var(--c-dark);
+  --surface: var(--c-dark-card);
+  --surface-2: var(--c-dark-raise);
+  --line: var(--c-dark-line);
+  --text: var(--c-cream);
+  --text-2: var(--c-cream-2);
+  --accent: var(--c-coral-night);
+  --accent-ink: var(--c-dark);
+  --accent-bright: var(--c-coral-night);
+  --accent-soft: rgba(255, 165, 142, .14);
+  --accent-edge: var(--c-coral-night);
+  --pill-ink: var(--c-coral-glow);
+  --pill-edge: var(--c-dark-line);
+  --link: var(--c-coral-glow);
   --ok: var(--c-ok-night);
-  --ok-soft: rgba(126, 232, 182, .14);
+  --ok-soft: rgba(139, 224, 181, .14);
   --warn: var(--c-warn-night);
-  --warn-soft: rgba(255, 200, 97, .14);
+  --warn-soft: rgba(255, 197, 107, .14);
   --danger: var(--c-danger-night);
-  --danger-soft: rgba(255, 158, 150, .14);
-  --focus: var(--c-blue-glow);
+  --danger-soft: rgba(255, 168, 154, .14);
+  --focus: var(--c-coral-glow);
   --scrim: rgba(0, 0, 0, .65);
+  --btn-shadow: none;
 
   --heading: var(--font-display);
+  --body: var(--font-legible);
   --fs-sm: 1rem;          /* 16 */
   --fs-body: 1.25rem;     /* 20 */
   --fs-lead: 1.5rem;      /* 24 */

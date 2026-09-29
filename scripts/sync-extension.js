@@ -8,7 +8,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const SHARED = ['metrics.js', 'words.js', 'share.js', 'rides.js', 'icons.js'];
 // Design tokens and fonts, so the popup looks like the same product.
-const ASSETS = [['css/tokens.css', 'extension/lib/tokens.css'], ['assets/fonts/atkinson-hyperlegible-400.woff2', 'extension/assets/fonts/atkinson-hyperlegible-400.woff2'], ['assets/fonts/atkinson-hyperlegible-700.woff2', 'extension/assets/fonts/atkinson-hyperlegible-700.woff2'], ['assets/fonts/geist-var.woff2', 'extension/assets/fonts/geist-var.woff2']];
+const ASSETS = [['css/tokens.css', 'extension/lib/tokens.css'], ['assets/fonts/atkinson-hyperlegible-400.woff2', 'extension/assets/fonts/atkinson-hyperlegible-400.woff2'], ['assets/fonts/atkinson-hyperlegible-700.woff2', 'extension/assets/fonts/atkinson-hyperlegible-700.woff2'], ['assets/fonts/outfit-var.woff2', 'extension/assets/fonts/outfit-var.woff2']];
 const DEST = path.join(ROOT, 'extension', 'lib');
 
 function sync() {
