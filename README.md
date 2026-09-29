@@ -97,15 +97,21 @@ On a laptop, the browser extension adds the same second look to WhatsApp Web, In
     <td><img src="docs/readme/11-settings-locked.jpg" alt="Settings locked after a flag"><br><sub><b>Settings locked.</b> A drunk you can't undo the sober plan.</sub></td>
     <td><img src="docs/readme/02-landing-demo.jpg" alt="Landing page demo"><br><sub><b>Landing.</b> A live mini-demo and a one-click sample night.</sub></td>
   </tr>
+  <tr>
+    <td><img src="docs/readme/16-your-data.jpg" alt="Your data section of the log"><br><sub><b>Your data.</b> What's stored, and where.</sub></td>
+    <td><img src="docs/readme/17-alerts-and-extension.jpg" alt="Alert and extension settings"><br><sub><b>Alerts and extension.</b> Encrypted contact link, and the code for the extension.</sub></td>
+  </tr>
 </table>
 
 <details>
 <summary><b>More of the landing page</b></summary>
 <br>
 <img src="docs/readme/03-why-it-matters.jpg" alt="Why it matters: India road accident data" width="900">
-<img src="docs/readme/04-how-it-works.jpg" alt="How it works in four steps" width="900">
+<img src="docs/readme/04-how-it-works.jpg" alt="How it works, steps 1 and 2" width="900">
+<img src="docs/readme/18-how-it-works-2.jpg" alt="How it works, steps 3 and 4" width="900">
 <img src="docs/readme/05-two-modes.jpg" alt="Sober Mode and Night Mode" width="900">
 <img src="docs/readme/06-promise.jpg" alt="A promise, not surveillance" width="900">
+<img src="docs/readme/19-call-to-action.jpg" alt="Make the plan tonight's you will thank you for" width="900">
 </details>
 
 ## Demo video
