@@ -19,8 +19,7 @@
     '.brand .eye{width:28px;height:18px;margin:0}',
     'h2{font-size:32px;line-height:1.15;margin:0 0 8px;color:#F4EFE6;font-weight:700}',
     'p{margin:0 0 16px;color:#C9C1B3}',
-    'ul{list-style:none;margin:0 0 16px;padding:0;color:#C9C1B3;display:grid;gap:4px}',
-    'li::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#FFBE55;margin-right:8px;vertical-align:middle}',
+    'p b{color:#F4EFE6}',
     '.plan{background:rgba(255,190,85,.14);border:2px solid #FFBE55;border-radius:14px;padding:12px 16px;margin:0 0 16px;color:#F4EFE6;font-weight:700}',
     '.plan q{display:block;font-weight:400;margin-top:6px;quotes:"\\201C" "\\201D"}',
     '.stack{display:grid;gap:12px;margin-top:8px}',
@@ -77,11 +76,10 @@
         '<div class="brand">' + eye('ok') + 'SecondLook</div>' +
         eye('count') +
         '<h2 id="t">Want a second look?</h2>' +
-        '<p id="d">This doesn’t look like how you usually text.</p>' +
-        (opts.reasons && opts.reasons.length ? '<ul aria-label="What’s different">' + opts.reasons.slice(0, 2).map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>' : '') +
+        '<p id="d">This doesn’t look like how you usually text' + (opts.reasons && opts.reasons.length ? ': <b>' + esc(opts.reasons[0].charAt(0).toLowerCase() + opts.reasons[0].slice(1)) + '</b>.' : '.') + '</p>' +
         (opts.plan ? '<div class="plan">' + esc(opts.plan.text) + (opts.plan.note ? '<q>' + esc(opts.plan.note) + '</q>' : '') + '</div>' : '') +
-        (rides ? '<p>Book a ride home:</p><div class="rides">' + rides + '</div>' : '') +
-        '<div class="count"><p>Checking in with you in <b data-secs>' + secs + '</b> seconds.</p><div class="bar" aria-hidden="true"><span></span></div></div>' +
+        (rides && !opts.plan ? '<p>Book a ride home:</p><div class="rides">' + rides + '</div>' : '') +
+        '<div class="count"><p>Checking in with you in <b data-secs>' + secs + '</b>s</p><div class="bar" aria-hidden="true"><span></span></div></div>' +
         '<div class="stack">' +
           '<button type="button" class="primary" data-a="edit">Edit my message</button>' +
           '<button type="button" data-a="send">Send it anyway</button>' +

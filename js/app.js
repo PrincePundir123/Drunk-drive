@@ -243,6 +243,7 @@
     var v = currentView;
     var p = getProfile(), b = getBaseline();
     $$('[data-view]').forEach(function (s) { s.hidden = s.getAttribute('data-view') !== v; });
+    document.documentElement.removeAttribute('data-boot');
     var appReady = !!(p && b);
     $('#tabbar').hidden = !appReady;
     $('#topnav').hidden = !appReady;

@@ -7,6 +7,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const PORT = Number(process.env.PORT) || 5173;
 const TYPES = {
+  '.woff2': 'font/woff2',
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -25,7 +26,16 @@ http.createServer((req, res) => {
   if (!file.startsWith(ROOT + path.sep)) { res.writeHead(403); res.end('Forbidden'); return; }
   fs.readFile(file, (err, data) => {
     if (err) { res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('Not found'); return; }
-    res.writeHead(200, { 'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-cache' });
+    const type = TYPES[path.extname(file)] || 'application/octet-stream';
+    const headers = { 'Content-Type': type, 'Cache-Control': /font|image/.test(type) ? 'public, max-age=86400' : 'no-cache' };
+    // gzip text like GitHub Pages does, so local performance numbers are realistic
+    if (/text|javascript|json|svg|manifest/.test(type) && /gzip/.test(req.headers['accept-encoding'] || '')) {
+      headers['Content-Encoding'] = 'gzip';
+      res.writeHead(200, headers);
+      res.end(require('zlib').gzipSync(data));
+      return;
+    }
+    res.writeHead(200, headers);
     res.end(data);
   });
 }).listen(PORT, () => console.log(`SecondLook running at http://localhost:${PORT}`));

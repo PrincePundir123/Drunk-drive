@@ -15,6 +15,7 @@ body {
 body.has-tabbar { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom)); }
 body.no-scroll { overflow: hidden; }
 [hidden] { display: none !important; }
+[data-boot="app"] [data-view="welcome"] { display: none; }
 img, svg { display: block; }
 p { margin: 0 0 var(--s-4); }
 a { color: var(--accent); text-underline-offset: 3px; }
@@ -48,8 +49,6 @@ h1:focus, h2:focus { outline: none; }
 .page { width: 100%; max-width: var(--w-read); margin: 0 auto; padding: var(--s-6) var(--gutter) var(--s-8); }
 .page.wide { max-width: var(--w-page); }
 .section { margin-top: var(--s-7); }
-.section-title { font-size: var(--fs-h2); }
-.hairline { border: 0; border-top: 1px solid var(--line); margin: var(--s-6) 0; }
 .stack { display: grid; gap: var(--s-3); }
 .btn-row { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; margin: var(--s-4) 0; }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-2); padding: var(--s-5); }
@@ -170,7 +169,6 @@ textarea.code { font: .8rem/1.4 ui-monospace, Consolas, monospace; word-break: b
 .stepper-bar span { display: block; height: 100%; background: var(--accent); border-radius: inherit; transition: width var(--t-med) var(--ease-out); }
 .step-nav { display: flex; gap: var(--s-3); margin-top: var(--s-6); }
 .step-nav .btn.primary { flex: 1; }
-.promise-q { font-size: var(--fs-lead); color: var(--text-2); margin-bottom: var(--s-5); }
 
 /* ================================================================ the eye (signature element) */
 .eye { overflow: visible; }
@@ -416,8 +414,8 @@ details.more > summary small { font-family: var(--font-body); font-size: var(--f
 
 /* ================================================================ settings */
 .settings { display: grid; gap: var(--s-6); }
-.settings-nav { display: flex; gap: var(--s-2); overflow-x: auto; padding-bottom: var(--s-2); margin: 0 calc(var(--gutter) * -1); padding-left: var(--gutter); padding-right: var(--gutter); scrollbar-width: thin; }
-.settings-nav button { flex: none; display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--s-4); border-radius: var(--r-pill); background: var(--surface); border: 1px solid var(--line); color: var(--text); font: 700 var(--fs-sm) var(--font-body); cursor: pointer; text-align: left; }
+.settings-nav { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.settings-nav button { display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--s-4); border-radius: var(--r-pill); background: var(--surface); border: 1px solid var(--line); color: var(--text); font: 700 var(--fs-sm) var(--font-body); cursor: pointer; text-align: left; }
 @media (min-width: 900px) {
   .settings { grid-template-columns: 200px 1fr; align-items: start; }
   .settings-nav { position: sticky; top: calc(var(--header-h) + var(--s-5)); flex-direction: column; margin: 0; padding: 0; overflow: visible; }

@@ -43,6 +43,26 @@ Rides and emergencies share one module (`js/rides.js`). Uber opens with home fil
 
 The validation study (`study.html`, not linked from the app) measures the false-alarm rate with safe stand-ins for impairment. There's more on that under Evidence below.
 
+## Design: one product, two modes
+
+The same person meets SecondLook in two very different states, so the interface has two modes.
+
+Sober Mode is daylight: a light, calm palette with an indigo "dusk" accent and a warm grotesque for headings (Bricolage Grotesque). It's used for the landing page, setup, the baseline, the dashboard, the log and settings, which is where you make the plan. It can afford a little more detail.
+
+Night Mode is streetlight: charcoal with a single amber accent, used for the second-look prompt, the check-in, the alert, Night Out reminders and the contact's page. At 2am, in a dark bar, one-handed, maybe drunk, it follows different rules:
+
+- one primary action per screen, in the bottom thumb zone (64px tall, other targets at least 56px);
+- 20px body text and 32px key text in Atkinson Hyperlegible, a typeface the Braille Institute designed for low-vision readers;
+- every text colour at WCAG AAA contrast (7:1 or better), with warm white rather than blue-white glare;
+- your own words first: "You planned to take an Uber home", and the one primary button is "Open Uber, like you planned";
+- a countdown that's obvious but calm: the logo's iris drains as time runs out, never a red siren.
+
+The dashboard and messages switch to Night Mode on their own during a Night Out or after something is flagged, and say so in one line.
+
+The signature element is the eye. The logo (an eye with a pause in the pupil) is also the status display. Its lid lowers as things look less like you, its iris is the check-in countdown, and its fill is the quick-check score.
+
+The design docs are [`docs/design-audit.md`](docs/design-audit.md) (a blunt audit of the old UI) and [`docs/design-plan.md`](docs/design-plan.md) (palettes with contrast ratios, type scale, wireframes, and a review against generic AI-looking defaults). Before and after screenshots of every screen at 360, 768 and 1280px are in [`docs/screenshots/`](docs/screenshots/). All colours, type, spacing, radius and motion come from one token file, [`css/tokens.css`](css/tokens.css), and the fonts are self-hosted so everything works offline.
+
 ## Architecture
 
 ```
@@ -136,7 +156,12 @@ The signals are reaction time, tracking error on the moving dot, time between ke
 ## Project structure
 
 ```
-index.html, css/style.css   web app shell and styles
+index.html                  landing page and app shell
+css/tokens.css              design tokens for Sober Mode and Night Mode
+css/style.css               components (only uses tokens)
+js/icons.js                 line icons and the eye (logo, status, countdown)
+assets/fonts/               Atkinson Hyperlegible and Bricolage Grotesque (woff2, OFL)
+docs/                       design audit, design plan, before/after screenshots
 js/app.js                   views, prompt, check-in, alerts, Night Out, log, settings, demo
 js/metrics.js               scoring (pure functions, also used by the tests)
 js/tests.js                 reaction, steady-hand and typing tasks; keystroke recorder
@@ -158,7 +183,13 @@ tests/                      node:test unit tests
 
 `npm test` runs 38 unit tests covering scoring, keystroke analysis, the dictionary, encryption, contact links, the QR encoder, the extension codec and packaging, Night Out logic, ride links and the study analysis math. The QR codes were also checked with an independent decoder (jsQR) across versions 2 to 39.
 
-Every flow was also run end to end in Microsoft Edge with Playwright: setup, baseline, prompt, check-in and alert; the real unpacked extension on mock WhatsApp Web and Gmail pages served at their real URLs; two browsers talking through the live ntfy.sh; Night Out; rides and 112; the study; and a keyboard-only walkthrough at 360px width. Every text colour meets WCAG AA contrast. The browser tests aren't in the repo because they need Playwright.
+Every flow was also run end to end in Microsoft Edge with Playwright: setup, baseline, prompt, check-in and alert; the real unpacked extension on mock WhatsApp Web and Gmail pages served at their real URLs; two browsers talking through the live ntfy.sh; Night Out; rides and 112; the study; and a keyboard-only walkthrough at 360px width. The browser tests aren't in the repo because they need Playwright.
+
+Accessibility and performance, measured:
+
+- axe-core (WCAG 2.1 A/AA plus best practices) found 0 violations on all 24 screen states, including the prompt, check-in and alert, at 360 and 1280px.
+- Lighthouse, mobile preset: the landing page scores Performance 98–99, Accessibility 100, Best Practices 100, SEO 100. The contact view scores 99–100, 100, 100. The study scores 100, 100, 100. The contact and study pages score lower on SEO on purpose: they're `noindex`, because a private contact link must never appear in search.
+- There's no sideways scrolling or clipped button at 320px (WCAG reflow) or at 200% zoom. Every flow works keyboard-only with a visible focus ring. Countdowns announce at 30, 10 and 5 seconds. `prefers-reduced-motion` turns off the landing mini-demo and the sheet animation.
 
 ## Limitations
 
