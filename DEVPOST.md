@@ -1,88 +1,94 @@
 # Devpost submission
 
-Paste each section into the matching Devpost field.
+Copy each section into the matching field on Devpost. Headings in this file match the Devpost form.
 
-**Project name:** SecondLook
-**Tagline:** The pause before a bad decision. It learns your sober self and steps in when you drift.
-**Built with:** javascript, html5, css3, web-crypto, chrome-extension, manifest-v3, ntfy, service-worker, pwa, node.js, playwright
+---
+
+## Project name
+
+SecondLook
+
+## Elevator pitch (tagline, max 200 characters)
+
+The pause before a bad decision. Make the plan while you're sober; SecondLook keeps that promise at 2am with a gentle second look, a check-in and your ride home.
+
+## Try it out (links)
+
+- Live app: https://secondlook1.vercel.app/
+- GitHub: https://github.com/PrincePundir123/Drunk-drive
+- Demo video: [add your YouTube link]
+
+## Built with (tags)
+
+javascript, html5, css3, pwa, service-worker, web-crypto-api, chrome-extension, manifest-v3, ntfy, node.js, playwright, axe-core, lighthouse, vercel
 
 ---
 
 ## Inspiration
 
-Drunk driving isn't an information problem. Everyone knows it's dangerous. The trouble is that alcohol damages the judgment you'd need to notice you're too drunk to drive, and feeling fine is one of the symptoms. Most apps stop at "you might be impaired", which hands the decision back to the one person who can't make it well tonight.
+In India in 2022, 4,201 people were killed in crashes caused by drunk driving or drugs, 26.8% more than the year before (Ministry of Road Transport and Highways, *Road Accidents in India 2022*). That's about one every two hours.
 
-So we asked a different question. What if the sober you, earlier in the day, could make the decision instead, and the app just kept that promise?
+What stuck with me is that drunk driving isn't an information problem. Everyone knows it's dangerous. The problem is that alcohol breaks the judgment you'd need to notice you're too drunk, and feeling fine is one of the symptoms. Most apps stop at "you might be impaired", which hands the decision back to the one person who can't make it well tonight.
+
+So I asked a different question: what if the sober you, earlier in the day, made the decision, and the app just kept that promise?
 
 ## What it does
 
-SecondLook starts with a 2-minute sober baseline: how fast you react, how steady your hand is when following a moving dot, and how you normally type. Every later reading is compared with you, never with other people.
+SecondLook is an installable mobile web app plus a browser extension.
 
-Later in the night, a browser extension watches for drift on WhatsApp Web, Instagram DMs and Gmail. It looks at slower and more uneven typing, more corrections, long pauses and misspellings. When a message looks unlike you, it holds it and asks: "This looks a little different from how you usually text. Want a second look?" You can edit it, send it anyway (it really sends), or take a one-minute check.
+**While you're sober,** you pick a safe contact, decide what they'll hear, and take a 2-minute baseline: a reaction test, a steady-hand tracking test and a short typing test. That's your normal, compared with nobody but you. Before going out, you start a Night Out: how you're getting home, when you'll be home, and a note to later-tonight you ("Don't drive, Alex. Seriously.").
 
-If you don't answer, the SecondLook app opens a check-in with a countdown. It offers a ride home, a text or call to your safe contact, a 15-second reaction test to show you're fine, and a confirmed 112 call. If the countdown runs out and you agreed to this while sober, your contact's phone gets a real notification. They open a small page, tap "I'm on my way", and that answer shows up as a banner on your screen.
+**Later that night,** when a message you type looks very different from your usual typing (slower, less even, more corrections and typos), SecondLook holds it and asks, "Want a second look?". It shows your own plan first, with one big button. You can edit or send it anyway. It never blocks you.
 
-Night Out mode lets you commit before you leave: "I'm taking an Uber, home by 1:30, don't drive, Prashant, seriously." Later, every prompt shows your own plan first, with one tap to open Uber and your home already filled in. Nothing happens behind your back. Every step goes into a transparency log in plain English, and safety settings lock for 6 hours after a flag so a drunk you can't quietly switch off the sober plan.
+**If you ignore it,** a check-in starts with a calm countdown. One tap opens the ride you planned (Uber, Ola or Rapido). You can call or text your contact, prove you're fine with a 15-second reaction test, or call 112. If the countdown runs out, and only if you agreed to this while sober, your contact gets an end-to-end encrypted alert on their phone. They can reply "I'm on my way", and you see it on your screen.
 
-## Design: one product, two modes
+**Nothing happens behind your back.** Every step goes into a plain-English log you can download. After something is flagged, your safety settings lock for 6 hours, so a drunk you can't quietly switch off what the sober you decided.
 
-You make the plan in daylight, and the app keeps it under streetlight. Sober Mode (setup, dashboard, settings) is calm and light and can show some detail. Night Mode (the prompt, check-in, alert, reminders and the contact's page) is built for someone at 2am in a dark bar with one free hand. It has one big amber button in the thumb zone, large text in Atkinson Hyperlegible (a typeface designed for low-vision readers), AAA contrast, and your own plan first: "You planned to take an Uber home", with one button that says "Open Uber, like you planned". The logo is an eye with a pause in the pupil, and it doubles as the status: the lid lowers when things look off, and the iris drains as the check-in counts down.
+On a laptop, the browser extension brings the same second look to WhatsApp Web, Instagram DMs and Gmail, right before you hit send.
 
-We measured it rather than eyeballing it. axe-core found zero accessibility violations across all 24 screen states. Lighthouse on mobile scores 100 for accessibility on every page and 98–100 for performance. It works keyboard-only, at 320px, and at 200% zoom.
+**Who it's for:** people who drink socially and want a safety net they set up themselves, and the friends and family who'd rather get a message than a call from a hospital.
 
-## How we built it
+## How I built it
 
-It's plain HTML, CSS and JavaScript with no framework and no build step, so it runs from `index.html` or GitHub Pages and installs as a PWA. The scoring is a set of pure functions: per-signal z-scores against running statistics (Welford's algorithm), floors so a thin baseline can't cause false alarms, and only the impaired direction counts.
+It's plain HTML, CSS and JavaScript with no framework and no build step. It's a Progressive Web App with a service worker, so it installs from a link on Android or iPhone and works offline. It's hosted on Vercel.
 
-The extension is Manifest V3. It uses capture-phase listeners that record keystroke timing only and read the text once, in memory, at send time. The prompt lives in a closed Shadow DOM so the site's CSS can't touch it. Every site selector sits in one config file with fallbacks, and everything fails open: if our code throws, your message sends.
+**Scoring.** Each signal (reaction time, tracking error, time between keys, rhythm, corrections, long pauses, typos, misspelled words) is compared with your own baseline as a z-score, using running averages (Welford's algorithm). Floors stop a short baseline from causing false alarms, and only the impaired direction counts, so typing faster never counts against you.
 
-Alerts are end-to-end encrypted with Web Crypto AES-GCM. The key rides in the URL fragment of the link you share with your contact, which browsers never send to a server, so the ntfy.sh relay only ever sees ciphertext and a generic "may need help" notification. We also wrote a small QR encoder so the link can be shared without any CDN, and checked its output with an independent decoder.
+**Privacy.** Message text is never stored or sent. The recorder keeps only key timings and counts. At send time the text is read once, in memory, to count misspelled words, then thrown away. All data stays in your own browser: no server, no account.
 
-We have 38 unit tests, and we ran every flow in Edge with Playwright. That included the real extension on mock WhatsApp and Gmail pages served at their real URLs, and two browsers talking through the live ntfy.sh.
+**Encrypted alerts.** Alerts use the Web Crypto API (AES-GCM, 256-bit). The key sits in the part of the contact link after `#`, which browsers never send to a server, so the free ntfy.sh relay only ever sees scrambled data and a generic "may need help" notification.
 
-## Challenges we ran into
+**The extension** is Manifest V3. It catches Enter and the send button with capture-phase listeners, shows the prompt in a closed Shadow DOM so the site can't interfere, and fails open: if anything breaks, your message sends normally.
 
-The hardest part was not being annoying. Too many prompts and people turn it off. Our dictionary was flagging normal work emails ("team", "report", "attached") as misspellings, so we grew it to about 2,500 words and we compare the misspelling rate with your own usual rate.
+**Testing.** 38 unit tests, seven end-to-end browser suites in Playwright (167 checks), axe-core with 0 accessibility violations on 24 screen states, and Lighthouse on mobile at 99 to 100 for performance and 100 for accessibility.
 
-Consent and safety pull against each other. Stepping in when someone can't decide is the point, but doing it behind their back would be surveillance. Advance consent, a visible countdown that says exactly what happens next, and a log of every action got us there.
+**AI assistance (disclosed as the rules ask):** I built this with a lot of help from Claude Code, an AI coding assistant by Anthropic. I came up with the idea, wrote the requirements (including the privacy and consent rules), chose the design direction and the data source, and tested and deployed it. A large part of the code, tests and documentation was written by the AI from my instructions, working with me step by step.
 
-The web has limits. Browsers can't send SMS by themselves and they throttle background tabs. We used ntfy for real notifications and said plainly in the UI where the limits are. Uber's current deep-link format needs coordinates, so instead of geocoding through a server we let you save your home location on your own device.
+## Challenges I ran into
 
-## Accomplishments that we're proud of
+- **Designing for someone who's drunk.** Normal UI assumes a focused user. At 2am, in a dark bar, one-handed, you need one action per screen, big buttons where your thumb is, large text, strong contrast, and a tone that never shames.
+- **Checking typing without keeping the words.** My first version stored words to count typos, which meant storing pieces of private messages. I rebuilt it so only timings and counts are kept.
+- **Making the extension safe on other people's websites.** Catching Enter before WhatsApp does, without ever losing a message, needed a strict "if anything fails, just send" rule.
+- **Encryption without a backend.** Putting the key in the link's `#` part let the contact get alerts without any server I run being able to read them.
+- **Performance.** An animated background dropped Lighthouse performance to 94 and blocked the page for 210 ms. Drawing the still grid once and only redrawing the moving ripple brought it back to 98 to 99, with no blocking.
+- **Colour contrast.** My coral button colour failed contrast with white text (2.8:1), so I kept it for decoration and used a deeper coral for buttons and text.
 
-- The loop works for real: a message caught in WhatsApp Web ends with a notification on the contact's phone and their "on my way" on your screen, and ntfy never sees what happened.
-- The settings lock means an impaired you can't quietly undo what the sober you decided.
-- It never says "you're safe to drive". A normal result says you look like your usual self, and that a ride is still the safer choice if you've been drinking.
-- It's usable with only a keyboard, meets WCAG AA contrast, and has no sideways scrolling at 360px.
+## Accomplishments that I'm proud of
 
-## What we learned
+- It works end to end: prompt, check-in, encrypted alert and the contact's reply, between two real devices, with no server of my own.
+- It never stores a single word of your messages.
+- Zero accessibility violations, and it works fully with the keyboard alone, at 320px width and at 200% zoom.
+- It never tells you "you're safe to drive". It's honest about what it can't know.
 
-The wording of a prompt decides whether anyone listens. "Want a second look?" gets a different reaction from "You seem drunk." We also learned how much keystroke timing reveals, which is why none of it leaves the device, and that a web page can do real end-to-end encryption with nothing but Web Crypto and a URL fragment.
+## What I learned
 
-## Evidence
-
-*(Fill in after the study. These are placeholders, never taken from synthetic data.)*
-
-We ran a small study with [N] people using safe stand-ins for impairment, never alcohol: typing with the non-dominant hand, counting backwards by 7 out loud during the tasks, and an optional tired round. On a sober retest, SecondLook raised a false alarm [__]% of the time at the default threshold. It flagged [__]% of non-dominant-hand rounds and [__]% of dual-task rounds. Stand-ins aren't intoxication, so this shows the scoring reacts to disturbed motor control and attention; it doesn't prove it detects alcohol. A real product would need a clinical study.
+- How to turn "does this person seem off?" into numbers: z-scores, running averages, and why floors matter with little data.
+- How end-to-end encryption works in the browser, and how to share a key without a server.
+- How browser extensions work: content scripts, capture-phase events, Shadow DOM, Manifest V3.
+- How service workers and PWAs let a website install and work offline like an app.
+- That accessibility has to be measured (axe, Lighthouse, keyboard-only testing), not guessed.
+- That for a safety tool, honesty earns more trust than big claims.
 
 ## What's next for SecondLook
 
-A keyboard for Android and iOS so it works in every messaging app, steadiness from the phone's motion sensors, SMS alerts from a small server for contacts who won't install ntfy, one-tap booking through ride-app APIs, and a proper consented study.
-
----
-
-## Demo video script (1:55)
-
-Setup before recording: host the app on GitHub Pages and load the demo profile (user Alex, contact Priya). In Settings, add a home address and tap "I'm at home, save this location" so Uber opens with home filled in. Export the extension code and import it into the extension, then open WhatsApp Web. On your phone, open the contact link once and subscribe to the topic in the ntfy app. Use a split screen in the edit for 0:55–1:25.
-
-| Time | On screen | Voice-over |
-|---|---|---|
-| 0:00–0:10 | Landing page | "Drunk driving happens because being drunk breaks the judgment you'd need to notice you're too drunk to drive." |
-| 0:10–0:22 | Setup screen, then the Night Out form: Uber, home by 1:30, note "Don't drive, Alex. Seriously." | "So with SecondLook you decide while you're sober: who your safe contact is, and how you're getting home tonight." |
-| 0:22–0:40 | WhatsApp Web. Type a sloppy message slowly with corrections, press Enter. The prompt appears. | "Later, the extension notices my typing doesn't look like me and asks once: want a second look?" |
-| 0:40–0:48 | Don't answer. Jump-cut to the new tab with the check-in countdown. | "I ignore it, so SecondLook checks in with me directly. It offers a ride, my contact, or a 15-second test." |
-| 0:48–0:55 | Countdown hits zero: "We let Priya know". | "No answer, and I agreed to this while sober, so my contact is told." |
-| 0:55–1:10 | Split screen: the phone gets the ntfy notification, then tap → contact page "Alex may need help". | "Her phone gets a real notification. The details are end-to-end encrypted; the relay never sees them." |
-| 1:10–1:25 | Contact taps "I'm on my way". Laptop banner: "Priya is on the way – 1:12 AM". Tap "Thanks, I'm staying put". | "She taps on my way, and it shows up on my screen right away." |
-| 1:25–1:42 | Night Out reminder sheet: "How’s it going, Alex?" with "You planned to take an Uber home." Tap "Heading home: open Uber". | "And instead of a lecture, it shows me my own plan, one tap to an Uber with home already filled in." |
-| 1:42–1:55 | Transparency log, then logo. | "Every step is in a log I can read. Nothing happens behind my back. SecondLook: the pause before a bad decision." |
+A real phone keyboard for Android and iOS (where people actually type at night), steadiness readings from the phone's motion sensors, SMS alerts for contacts without the ntfy app, one-tap booking through ride-app APIs, typo checking in Hindi and other Indian languages, and a proper study with real participants to measure the false-alarm rate. The study page is already built, but I haven't collected enough results to report numbers yet.
