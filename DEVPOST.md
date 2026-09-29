@@ -16,7 +16,7 @@ The pause before a bad decision. Make the plan while you're sober; SecondLook ke
 
 - Live app: https://secondlook1.vercel.app/
 - GitHub: https://github.com/PrincePundir123/Drunk-drive
-- Demo video: [add your YouTube link]
+- Demo video: https://www.youtube.com/watch?v=rpp4s6Ub9mg
 
 ## Built with (tags)
 

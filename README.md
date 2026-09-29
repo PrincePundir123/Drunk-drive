@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="https://secondlook1.vercel.app/"><b>Live app</b></a> ·
-  <a href="#demo-video"><b>Demo video</b></a> ·
+  <a href="https://www.youtube.com/watch?v=rpp4s6Ub9mg"><b>Demo video</b></a> ·
   <a href="#try-it-in-two-minutes"><b>Try it in 2 minutes</b></a> ·
   <a href="#run-it-on-your-computer"><b>Run it locally</b></a>
 </p>
@@ -116,7 +116,10 @@ On a laptop, the browser extension adds the same second look to WhatsApp Web, In
 
 ## Demo video
 
-**[Watch the 5-minute demo on YouTube](#)** *(link added before submission)*
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=rpp4s6Ub9mg"><img src="https://img.youtube.com/vi/rpp4s6Ub9mg/hqdefault.jpg" alt="Watch the SecondLook demo on YouTube" width="640"></a><br>
+  <a href="https://www.youtube.com/watch?v=rpp4s6Ub9mg"><b>▶ Watch the demo on YouTube</b></a>
+</p>
 
 It covers a live demo of the whole flow, how the scoring works, the technologies used, the challenges and what I learned.
 
@@ -355,7 +358,7 @@ The app is small, and I wanted it to load fast on low-end phones and run straigh
 | Working project | [secondlook1.vercel.app](https://secondlook1.vercel.app/) |
 | Public GitHub repository | This repo |
 | What it is, the problem, who it's for | [The problem](#the-problem), [What SecondLook does](#what-secondlook-does) |
-| Demo video (3–5 min) | [Demo video](#demo-video) |
+| Demo video (3–5 min) | [YouTube](https://www.youtube.com/watch?v=rpp4s6Ub9mg) |
 | Setup instructions | [Try it in two minutes](#try-it-in-two-minutes), [Run it on your computer](#run-it-on-your-computer) |
 | Technologies used | [Tech stack](#tech-stack) |
 | Challenges and what I learned | [Challenges](#challenges-i-ran-into), [What I learned](#what-i-learned) |
