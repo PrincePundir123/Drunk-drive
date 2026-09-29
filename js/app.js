@@ -255,7 +255,7 @@
     var night = appReady && ['home', 'chat', 'check'].indexOf(v) >= 0 && !!(getNight() || recentFlags(LOCK_WINDOW).length);
     document.body.setAttribute('data-mode', night ? 'night' : 'day');
     var meta = $('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', night ? '#0A0A0F' : '#F2F2F2');
+    if (meta) meta.setAttribute('content', night ? '#1C1917' : '#FFFDF9');
     $('#demo-badge').hidden = !(p && p.demo);
     $('#bar-cta').hidden = v !== 'welcome';
     var section = $('[data-view="' + v + '"]');
@@ -1975,8 +1975,6 @@
   // ======================================================================
   // The landing page's one orchestrated moment: a message gets typed, then paused.
   function renderWelcome(root) {
-    // decorative: pixel planets and settling headlines (the page works without them)
-    try { if (window.SLPixel) { window.SLPixel.settleAll(root); requestAnimationFrame(function () { window.SLPixel.paint(root); }); } } catch (e) { /* ignore */ }
     var phone = $('.phone', root);
     if (!phone) return null;
     var compose = $('#pc-text', root), sheet = $('.phone-sheet', root), replay = $('.replay', root), quote = $('#pc-quote', root);
