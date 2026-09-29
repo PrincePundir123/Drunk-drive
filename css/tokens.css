@@ -2,8 +2,8 @@
  * Look: warm off-white canvas, white cards with hairlines, one coral accent, tinted pill
  * labels, a geometric sans. Two modes of one product:
  *   Sober Mode  – planning: calm, clear, a little more detail.
- *   Night Mode  – the prompt, check-in, alert, reminders, contact view: a warm-dark version,
- *                 one action, big thumb targets, large legible type, AAA contrast.
+ *   Night Mode  – the prompt, check-in, alert, reminders, contact view: the same light look,
+ *                 one action, big thumb targets, large type, AAA contrast.
  * Components only use the semantic tokens (--bg, --text, --accent, …); putting
  * data-mode="night" on any element re-themes everything inside it. */
 
@@ -131,43 +131,45 @@
   color-scheme: light;
 }
 
-/* ---------- Night Mode (warm dark) ---------- */
+/* ---------- Night Mode ----------
+ * Same light look as Sober Mode, tuned for 2am: bigger type and thumb targets, and a deeper
+ * coral and grey so every pair reaches AAA (7:1+). */
 [data-mode="night"] {
-  --bg: var(--c-dark);
-  --surface: var(--c-dark-card);
-  --surface-2: var(--c-dark-raise);
-  --line: var(--c-dark-line);
-  --text: var(--c-cream);
-  --text-2: var(--c-cream-2);
-  --accent: var(--c-coral-night);
-  --accent-ink: var(--c-dark);
-  --accent-bright: var(--c-coral-night);
-  --accent-soft: rgba(255, 165, 142, .14);
-  --accent-edge: var(--c-coral-night);
-  --pill-ink: var(--c-coral-glow);
-  --pill-edge: var(--c-dark-line);
-  --link: var(--c-coral-glow);
-  --ok: var(--c-ok-night);
-  --ok-soft: rgba(139, 224, 181, .14);
-  --warn: var(--c-warn-night);
-  --warn-soft: rgba(255, 197, 107, .14);
-  --danger: var(--c-danger-night);
-  --danger-soft: rgba(255, 168, 154, .14);
-  --focus: var(--c-coral-glow);
-  --scrim: rgba(0, 0, 0, .65);
-  --btn-shadow: none;
+  --bg: var(--c-canvas);
+  --surface: var(--c-white);
+  --surface-2: var(--c-card-2);
+  --line: var(--c-line);
+  --text: var(--c-ink);            /* 13.8:1 */
+  --text-2: #4F4B48;               /* 8.5:1 */
+  --accent: #9C3015;               /* white on it 7.4:1 */
+  --accent-ink: #FFFFFF;
+  --accent-bright: var(--c-coral-bright);
+  --accent-soft: var(--c-coral-soft);
+  --accent-edge: #9C3015;
+  --pill-ink: #8A2F18;             /* 7.8:1 on the tint */
+  --pill-edge: var(--c-coral-edge);
+  --link: #8A2F18;
+  --ok: #0F5A36;
+  --ok-soft: var(--c-ok-soft);
+  --warn: #7A4200;
+  --warn-soft: var(--c-warn-soft);
+  --danger: #9E1C12;
+  --danger-soft: var(--c-danger-soft);
+  --focus: #9C3015;
+  --scrim: rgba(28, 25, 23, .55);
+  --btn-shadow: var(--shadow-cta);
 
   --heading: var(--font-display);
-  --body: var(--font-legible);
+  --body: var(--font-body);
   --fs-sm: 1rem;          /* 16 */
   --fs-body: 1.25rem;     /* 20 */
   --fs-lead: 1.5rem;      /* 24 */
   --fs-h2: 1.75rem;       /* 28 */
   --fs-h1: 2rem;          /* 32 */
   --fs-display: 4.5rem;   /* 72: countdown numerals */
-  --lh: 1.45;
+  --lh: 1.5;
 
   --tap-min: 56px;
   --tap-primary: 64px;
-  color-scheme: dark;
+  color-scheme: light;
 }

@@ -255,7 +255,7 @@
     var night = appReady && ['home', 'chat', 'check'].indexOf(v) >= 0 && !!(getNight() || recentFlags(LOCK_WINDOW).length);
     document.body.setAttribute('data-mode', night ? 'night' : 'day');
     var meta = $('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', night ? '#1C1917' : '#FFFDF9');
+    if (meta) meta.setAttribute('content', '#FFFDF9');
     $('#demo-badge').hidden = !(p && p.demo);
     $('#bar-cta').hidden = v !== 'welcome';
     var section = $('[data-view="' + v + '"]');
