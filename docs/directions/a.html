@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction A: Last bus home</title>
+<style>
+@font-face { font-family: "Big Shoulders"; src: url("fonts/big-shoulders-800.woff2") format("woff2"); font-weight: 800; font-display: swap; }
+@font-face { font-family: "Atkinson"; src: url("fonts/atkinson-hyperlegible-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Atkinson"; src: url("fonts/atkinson-hyperlegible-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+:root {
+  --paper: #F3F4F6; --surface: #FFFFFF; --ink: #0F1B33; --muted: #4E5A70; --route: #0B6E55; --signal: #F2B705; --line: #D5DAE3;
+  --night: #0E1726; --board: #172339; --n-ink: #F3F1EA; --n-muted: #B9C2D3; --led: #FFB23E; --led-ink: #1A1204; --arrive: #7FE0B4; --n-line: #2B3A57;
+  --sign: "Big Shoulders", "Arial Narrow", sans-serif; --body: "Atkinson", "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.55 var(--body); }
+.review { margin: 0; padding: 8px 16px; font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--line); }
+.bar { display: flex; align-items: center; gap: 12px; padding: 14px 16px; max-width: 1180px; margin: 0 auto; }
+.logo { display: flex; align-items: center; gap: 10px; font: 800 26px/1 var(--sign); letter-spacing: .01em; }
+.roundel { width: 40px; height: 40px; border-radius: 50%; border: 5px solid var(--route); display: grid; place-items: center; background: var(--surface); }
+.roundel svg { width: 22px; height: 14px; }
+.bar .go { margin-left: auto; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 56px; padding: 0 24px; border-radius: 12px; font: 700 18px/1 var(--body); text-decoration: none; border: 2px solid transparent; }
+.btn.primary { background: var(--route); color: #fff; }
+.btn.quiet { color: var(--ink); border-color: var(--ink); }
+.hero { max-width: 1180px; margin: 0 auto; padding: 24px 16px 56px; display: grid; gap: 32px; }
+.hero h1 { font: 800 clamp(64px, 12vw, 128px)/.88 var(--sign); letter-spacing: -.01em; margin: 0; }
+.hero h1 span { color: var(--route); }
+.hero p { font-size: 20px; color: var(--muted); max-width: 30em; margin: 20px 0 28px; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.route { margin-top: 36px; }
+.route ol { list-style: none; margin: 0; padding: 0; display: flex; position: relative; }
+.route ol::before { content: ""; position: absolute; left: 10px; right: 10px; top: 9px; height: 6px; background: var(--route); border-radius: 3px; }
+.route li { flex: 1; position: relative; padding-top: 32px; font-weight: 700; font-size: 15px; }
+.route li::before { content: ""; position: absolute; top: 0; left: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--surface); border: 5px solid var(--route); }
+.route li:last-child { text-align: right; }
+.route li:last-child::before { left: auto; right: 0; background: var(--signal); border-color: var(--ink); }
+.route small { display: block; font-weight: 400; color: var(--muted); font-size: 13px; }
+@media (min-width: 960px) { .hero { grid-template-columns: 1.2fr .8fr; align-items: center; padding-top: 48px; } }
+
+/* phones */
+.phone { width: 340px; max-width: 100%; margin: 0 auto; border-radius: 40px; background: var(--night); color: var(--n-ink); border: 10px solid #06101f; overflow: hidden; position: relative; aspect-ratio: 9 / 18.5; display: flex; flex-direction: column; font-size: 20px; }
+.p-head { display: flex; align-items: center; gap: 10px; padding: 18px 18px 12px; border-bottom: 1px solid var(--n-line); font-size: 16px; }
+.p-head .av { width: 32px; height: 32px; border-radius: 50%; background: var(--board); display: grid; place-items: center; color: var(--led); font-weight: 700; }
+.p-body { flex: 1; padding: 12px 14px; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; font-size: 16px; }
+.bub { background: var(--board); padding: 8px 12px; border-radius: 14px; max-width: 80%; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--board); border-top: 4px solid var(--led); padding: 16px 18px 20px; }
+.board { display: flex; justify-content: space-between; align-items: baseline; font: 800 22px/1 var(--sign); color: var(--led); letter-spacing: .02em; }
+.board b { font-size: 34px; font-variant-numeric: tabular-nums; }
+.sheet h3, .ci h3 { font: 700 26px/1.15 var(--body); margin: 10px 0 6px; }
+.sheet p, .ci p { margin: 0 0 12px; color: var(--n-muted); font-size: 18px; }
+.plan { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border: 2px solid var(--n-line); border-radius: 10px; margin-bottom: 12px; font-size: 18px; }
+.plan .stop { width: 14px; height: 14px; border-radius: 50%; background: var(--led); flex: none; }
+.pbtn { display: flex; align-items: center; justify-content: center; min-height: 64px; padding: 0 16px; text-align: center; border-radius: 12px; font: 700 21px var(--body); margin-top: 10px; }
+.pbtn.led { background: var(--led); color: var(--led-ink); }
+.pbtn.alt { min-height: 56px; border: 2px solid var(--n-line); color: var(--n-ink); font-size: 19px; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ci { flex: 1; display: flex; flex-direction: column; padding: 16px 18px 20px; }
+.ci-top { display: flex; justify-content: space-between; align-items: center; font-size: 15px; color: var(--n-muted); }
+.e112 { border: 2px solid #FF9E8F; color: #FF9E8F; border-radius: 10px; padding: 6px 12px; font-weight: 700; }
+.dep { margin: 14px 0 10px; padding: 14px; background: var(--board); border-radius: 12px; }
+.dep .board b { font-size: 72px; line-height: .85; }
+.rnd { width: 46px; height: 46px; border-radius: 50%; border: 5px solid var(--led); display: grid; place-items: center; margin-right: auto; }
+.rnd svg { width: 26px; height: 17px; }
+.dep .board { align-items: center; gap: 12px; }
+.trip { position: relative; height: 26px; margin: 14px 4px 4px; }
+.trip::before { content: ""; position: absolute; left: 0; right: 0; top: 10px; height: 6px; border-radius: 3px; background: var(--n-line); }
+.trip i { position: absolute; top: 10px; left: 0; height: 6px; width: 47%; border-radius: 3px; background: var(--led); }
+.trip b { position: absolute; top: 3px; width: 20px; height: 20px; border-radius: 50%; border: 4px solid var(--led); background: var(--night); }
+.trip .you { left: 0; } .trip .home { right: 0; border-color: var(--n-ink); }
+.trip-l { display: flex; justify-content: space-between; font-size: 13px; color: var(--n-muted); }
+.ci .grow { flex: 1; }
+.moments { max-width: 1180px; margin: 0 auto; padding: 16px 16px 64px; display: grid; gap: 32px; }
+.moments figure { margin: 0; }
+.moments figcaption { text-align: center; color: var(--muted); font-size: 15px; margin-top: 10px; }
+@media (min-width: 760px) { .moments { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<p class="review">Direction A: Last bus home (preview of the landing hero, the second-look prompt and the check-in)</p>
+<header class="bar">
+  <span class="logo"><span class="roundel"><svg viewBox="0 0 22 14"><path d="M1 7c3-5 7-6 10-6s7 1 10 6c-3 5-7 6-10 6S4 12 1 7z" fill="none" stroke="#0F1B33" stroke-width="2"/><circle cx="11" cy="7" r="3.5" fill="#0B6E55"/></svg></span>SecondLook</span>
+  <a class="btn primary go" href="#">Watch it happen</a>
+</header>
+<section class="hero">
+  <div>
+    <h1>Getting home, <span>planned sober.</span></h1>
+    <p>Drinking breaks the judgment you'd need to notice you're too drunk to drive. So you plan the ride home while you're clear-headed, and SecondLook keeps that plan for you at 2am.</p>
+    <div class="cta"><a class="btn primary" href="#">Watch it happen (20 seconds)</a><a class="btn quiet" href="#">Set it up</a></div>
+    <nav class="route" aria-label="How it works">
+      <ol>
+        <li>Your plan<small>made sober</small></li>
+        <li>A second look<small>before you send</small></li>
+        <li>A check-in<small>if you don't answer</small></li>
+        <li>Home<small>by ride or friend</small></li>
+      </ol>
+    </nav>
+  </div>
+  <div class="phone" aria-label="A late-night message gets a second look">
+    <div class="p-head"><span class="av">J</span><b>Jordan</b></div>
+    <div class="p-body"><p class="bub">are u still at the party?</p><p class="bub">how r u getting home</p></div>
+    <div class="sheet">
+      <div class="board"><span>Second look</span><b>0:20</b></div>
+      <h3>Want a second look?</h3>
+      <p>“heyy im fnie cna drive hme lol” doesn't look like how you usually text.</p>
+      <div class="pbtn led">Edit my message</div>
+    </div>
+  </div>
+</section>
+<section class="moments">
+  <figure>
+    <div class="phone">
+      <div class="p-head"><span class="av">J</span><b>Jordan</b></div>
+      <div class="p-body"><p class="bub">are u still at the party?</p></div>
+      <div class="sheet">
+        <div class="board"><span>Checking in with you in</span><b>0:20</b></div>
+        <h3>Want a second look?</h3>
+        <p>This doesn't look like how you usually text: more misspelled words.</p>
+        <div class="plan"><span class="stop"></span>Your plan: an Uber home</div>
+        <div class="pbtn led">Edit my message</div>
+        <div class="pbtn alt">Send it anyway</div>
+      </div>
+    </div>
+    <figcaption>The second-look prompt</figcaption>
+  </figure>
+  <figure>
+    <div class="phone">
+      <div class="ci">
+        <div class="ci-top"><span>SecondLook</span><span class="e112">112</span></div>
+        <div class="dep"><div class="board"><span class="rnd"><svg viewBox="0 0 22 14"><path d="M1 7c3-5 7-6 10-6s7 1 10 6c-3 5-7 6-10 6S4 12 1 7z" fill="none" stroke="#F3F1EA" stroke-width="2"/><circle cx="11" cy="7" r="3.5" fill="#FFB23E"/></svg></span><span>Checking in</span><b>0:28</b></div>
+          <div class="trip"><i></i><b class="you"></b><b class="home"></b></div>
+          <div class="trip-l"><span>You</span><span>Home</span></div></div>
+        <h3>Hey Alex. Just checking in.</h3>
+        <p>If you don't answer, Priya gets a message.</p>
+        <div class="plan"><span class="stop"></span>“Don't drive, Alex. Seriously.”</div>
+        <div class="grow"></div>
+        <div class="pbtn led">Open Uber, like you planned</div>
+        <div class="pair"><div class="pbtn alt">Call Priya</div><div class="pbtn alt">Text Priya</div></div>
+      </div>
+    </div>
+    <figcaption>The check-in: the line to home drains as time runs out</figcaption>
+  </figure>
+</section>
+</body>
+</html>

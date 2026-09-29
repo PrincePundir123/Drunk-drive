@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction B: Your sober self</title>
+<style>
+@font-face { font-family: "Fraunces"; src: url("fonts/fraunces-var.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Atkinson"; src: url("fonts/atkinson-hyperlegible-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Atkinson"; src: url("fonts/atkinson-hyperlegible-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+:root {
+  --sky: #E7EDF5; --paper: #FFFFFF; --ink: #1A1F2B; --muted: #4A5366; --dusk: #3544A8; --rose: #9C3D54; --line: #CBD5E3;
+  --plum: #1A1424; --raised: #251D33; --moon: #F3ECDD; --n-muted: #CBBFD6; --lamp: #FFBF66; --lamp-ink: #24160A; --ok: #9BE3BE; --n-line: #3B2F4F;
+  --voice: "Fraunces", Georgia, serif; --body: "Atkinson", "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--sky); color: var(--ink); font: 17px/1.55 var(--body); }
+.review { margin: 0; padding: 8px 16px; font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--line); }
+.bar { display: flex; align-items: center; gap: 10px; padding: 16px; max-width: 1180px; margin: 0 auto; font: 600 24px var(--voice); }
+.bar svg { width: 44px; height: 28px; }
+.bar .go { margin-left: auto; }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 56px; padding: 0 26px; border-radius: 18px; font: 700 18px/1 var(--body); text-decoration: none; }
+.btn.primary { background: var(--dusk); color: #fff; }
+.btn.quiet { color: var(--dusk); text-decoration: underline; text-underline-offset: 5px; }
+.hero { max-width: 1180px; margin: 0 auto; padding: 24px 16px 56px; display: grid; gap: 36px; }
+.hero h1 { font: 560 clamp(46px, 8vw, 88px)/1 var(--voice); font-variation-settings: "SOFT" 100, "opsz" 144; letter-spacing: -.02em; margin: 0; }
+.hero h1 em { color: var(--rose); font-style: italic; }
+.hero p { font-size: 20px; color: var(--muted); max-width: 30em; margin: 20px 0 28px; }
+.cta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.note { margin-top: 36px; padding: 22px 24px; background: var(--paper); border-radius: 4px 22px 22px 22px; max-width: 30em; font: italic 400 24px/1.35 var(--voice); color: var(--rose); }
+.note small { display: block; margin-top: 10px; font: 400 14px var(--body); color: var(--muted); font-style: normal; }
+@media (min-width: 960px) { .hero { grid-template-columns: 1.15fr .85fr; align-items: center; padding-top: 48px; } }
+
+.phone { width: 340px; max-width: 100%; margin: 0 auto; border-radius: 40px; background: var(--plum); color: var(--moon); border: 10px solid #0d0913; overflow: hidden; position: relative; aspect-ratio: 9 / 18.5; display: flex; flex-direction: column; font-size: 20px; }
+.p-head { display: flex; align-items: center; gap: 10px; padding: 18px 18px 12px; border-bottom: 1px solid var(--n-line); font-size: 16px; }
+.p-head .av { width: 32px; height: 32px; border-radius: 50%; background: var(--raised); display: grid; place-items: center; color: var(--lamp); font-weight: 700; }
+.p-body { flex: 1; padding: 12px 14px; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; font-size: 16px; }
+.bub { background: var(--raised); padding: 8px 12px; border-radius: 16px; max-width: 80%; margin: 0; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--raised); border-radius: 26px 26px 0 0; padding: 18px 20px 22px; }
+.moon-eye { width: 76px; height: 48px; display: block; margin-bottom: 6px; }
+h3 { font: 560 28px/1.15 var(--voice); font-variation-settings: "SOFT" 100; margin: 4px 0 8px; }
+.sheet p, .ci p { margin: 0 0 12px; color: var(--n-muted); font-size: 18px; }
+.said { font: italic 400 22px/1.3 var(--voice); color: var(--lamp); margin: 0 0 4px; }
+.said-by { font-size: 14px; color: var(--n-muted); margin: 0 0 14px; }
+.count { font-size: 17px; color: var(--n-muted); margin: 0 0 10px; }
+.count b { color: var(--moon); }
+.pbtn { display: flex; align-items: center; justify-content: center; min-height: 64px; padding: 0 16px; text-align: center; border-radius: 18px; font: 700 21px var(--body); margin-top: 10px; }
+.pbtn.lamp { background: var(--lamp); color: var(--lamp-ink); }
+.pbtn.alt { min-height: 56px; border: 2px solid var(--n-line); color: var(--moon); font-size: 19px; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ci { flex: 1; display: flex; flex-direction: column; padding: 16px 20px 22px; text-align: left; }
+.ci-top { display: flex; justify-content: space-between; align-items: center; font-size: 15px; color: var(--n-muted); }
+.e112 { border: 2px solid #FF9E8F; color: #FF9E8F; border-radius: 12px; padding: 6px 12px; font-weight: 700; }
+.big-moon { display: flex; align-items: center; gap: 16px; margin: 18px 0 8px; }
+.big-moon svg { width: 118px; height: 76px; }
+.big-moon b { font: 500 64px/1 var(--voice); font-variant-numeric: tabular-nums; }
+.big-moon small { display: block; font-size: 15px; color: var(--n-muted); }
+.grow { flex: 1; }
+.moments { max-width: 1180px; margin: 0 auto; padding: 16px 16px 64px; display: grid; gap: 32px; }
+.moments figure { margin: 0; }
+.moments figcaption { text-align: center; color: var(--muted); font-size: 15px; margin-top: 10px; }
+@media (min-width: 760px) { .moments { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <clipPath id="almond"><path d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z"/></clipPath>
+    <symbol id="eye-day" viewBox="0 0 120 76"><path d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z" fill="#fff" stroke="#1A1F2B" stroke-width="4"/><circle cx="60" cy="38" r="18" fill="#3544A8"/><circle cx="60" cy="38" r="7" fill="#F3ECDD"/></symbol>
+    <symbol id="eye-eclipse" viewBox="0 0 120 76"><path d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z" fill="#251D33" stroke="#F3ECDD" stroke-width="4"/><g clip-path="url(#almond)"><circle cx="60" cy="38" r="20" fill="#F3ECDD"/><circle cx="72" cy="34" r="20" fill="#251D33"/></g></symbol>
+    <symbol id="eye-eclipse-deep" viewBox="0 0 120 76"><path d="M6 38 C 28 6, 92 6, 114 38 C 92 70, 28 70, 6 38 Z" fill="#1A1424" stroke="#F3ECDD" stroke-width="4"/><g clip-path="url(#almond)"><circle cx="60" cy="38" r="20" fill="#FFBF66"/><circle cx="64" cy="36" r="20" fill="#1A1424"/></g></symbol>
+  </defs>
+</svg>
+<p class="review">Direction B: Your sober self (preview of the landing hero, the second-look prompt and the check-in)</p>
+<header class="bar"><svg><use href="#eye-day"/></svg>SecondLook<a class="btn primary go" href="#">See it happen</a></header>
+<section class="hero">
+  <div>
+    <h1>A note from your <em>sober self.</em></h1>
+    <p>Drinking breaks the judgment you'd need to notice you're too drunk to drive. So you write the plan while you're clear-headed, and SecondLook hands it back to you at 2am, in your own words.</p>
+    <div class="cta"><a class="btn primary" href="#">See it happen (20 seconds)</a><a class="btn quiet" href="#">Write my plan</a></div>
+    <blockquote class="note">“Uber home by 1:30. Don't drive, Alex. Seriously.”<small>Written at 6:12 pm, read at 1:48 am</small></blockquote>
+  </div>
+  <div class="phone" aria-label="A late-night message gets a second look">
+    <div class="p-head"><span class="av">J</span><b>Jordan</b></div>
+    <div class="p-body"><p class="bub">are u still at the party?</p><p class="bub">how r u getting home</p></div>
+    <div class="sheet">
+      <svg class="moon-eye"><use href="#eye-eclipse"/></svg>
+      <h3>Want a second look?</h3>
+      <p class="said">“Don't drive, Alex. Seriously.”</p>
+      <p class="said-by">You wrote this earlier tonight.</p>
+      <div class="pbtn lamp">Edit my message</div>
+    </div>
+  </div>
+</section>
+<section class="moments">
+  <figure>
+    <div class="phone">
+      <div class="p-head"><span class="av">J</span><b>Jordan</b></div>
+      <div class="p-body"><p class="bub">are u still at the party?</p></div>
+      <div class="sheet">
+        <svg class="moon-eye"><use href="#eye-eclipse"/></svg>
+        <h3>Want a second look?</h3>
+        <p>This doesn't look like how you usually text: more misspelled words.</p>
+        <p class="said">“Uber home by 1:30.”</p>
+        <p class="count">Checking in with you in <b>20 seconds</b></p>
+        <div class="pbtn lamp">Edit my message</div>
+        <div class="pbtn alt">Send it anyway</div>
+      </div>
+    </div>
+    <figcaption>The second-look prompt</figcaption>
+  </figure>
+  <figure>
+    <div class="phone">
+      <div class="ci">
+        <div class="ci-top"><span>SecondLook</span><span class="e112">112</span></div>
+        <div class="big-moon"><svg><use href="#eye-eclipse-deep"/></svg><div><b>28</b><small>seconds</small></div></div>
+        <h3>Hey Alex. Just checking in.</h3>
+        <p>If you don't answer, Priya gets a message.</p>
+        <p class="said">“Don't drive, Alex. Seriously.”</p>
+        <p class="said-by">You wrote this earlier tonight.</p>
+        <div class="grow"></div>
+        <div class="pbtn lamp">Open Uber, like you planned</div>
+        <div class="pair"><div class="pbtn alt">Call Priya</div><div class="pbtn alt">Text Priya</div></div>
+      </div>
+    </div>
+    <figcaption>The check-in: the moon eclipses as time runs out</figcaption>
+  </figure>
+</section>
+</body>
+</html>

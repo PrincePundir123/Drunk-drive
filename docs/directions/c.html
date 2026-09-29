@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction C: Crosswalk</title>
+<style>
+@font-face { font-family: "Unbounded"; src: url("fonts/unbounded-var.woff2") format("woff2"); font-weight: 200 900; font-display: swap; }
+@font-face { font-family: "Atkinson"; src: url("fonts/atkinson-hyperlegible-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Atkinson"; src: url("fonts/atkinson-hyperlegible-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+:root {
+  --signal: #FFD23F; --white: #FFFFFF; --ink: #121212; --muted: #3A3320; --blue: #1446A0;
+  --asphalt: #1F232B; --raised: #2A2F39; --paint: #F5F5F0; --n-muted: #C3C9D3; --walk: #7CEBAA; --n-line: #3E4452;
+  --wide: "Unbounded", "Arial Black", sans-serif; --body: "Atkinson", "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--signal); color: var(--ink); font: 18px/1.5 var(--body); }
+.review { margin: 0; padding: 8px 16px; font-size: 13px; color: var(--muted); border-bottom: 2px solid var(--ink); }
+.bar { display: flex; align-items: center; gap: 12px; padding: 16px; max-width: 1180px; margin: 0 auto; font: 800 22px var(--wide); letter-spacing: -.02em; }
+.bar svg { width: 46px; height: 30px; }
+.bar .go { margin-left: auto; }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 60px; padding: 0 28px; border-radius: 0; font: 700 19px/1 var(--body); text-decoration: none; border: 3px solid var(--ink); }
+.btn.primary { background: var(--ink); color: var(--signal); }
+.btn.quiet { background: transparent; color: var(--ink); }
+.hero { max-width: 1180px; margin: 0 auto; padding: 16px 16px 48px; display: grid; gap: 36px; }
+.hero h1 { font: 900 clamp(54px, 11vw, 124px)/.95 var(--wide); letter-spacing: -.04em; margin: 0; }
+.hero p { font-size: 21px; color: var(--muted); max-width: 28em; margin: 22px 0 28px; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.zebra { display: flex; gap: 12px; margin-top: 40px; height: 64px; }
+.zebra i { flex: 1; background: var(--ink); }
+@media (min-width: 960px) { .hero { grid-template-columns: 1.15fr .85fr; align-items: center; padding-top: 40px; } }
+
+.phone { width: 340px; max-width: 100%; margin: 0 auto; border-radius: 40px; background: var(--asphalt); color: var(--paint); border: 10px solid var(--ink); overflow: hidden; position: relative; aspect-ratio: 9 / 18.5; display: flex; flex-direction: column; font-size: 20px; }
+.p-head { display: flex; align-items: center; gap: 10px; padding: 18px 18px 12px; border-bottom: 2px solid var(--n-line); font-size: 16px; }
+.p-head .av { width: 32px; height: 32px; background: var(--signal); color: var(--ink); display: grid; place-items: center; font-weight: 700; }
+.p-body { flex: 1; padding: 12px 14px; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; font-size: 16px; }
+.bub { background: var(--raised); padding: 8px 12px; max-width: 80%; margin: 0; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--asphalt); border-top: 6px solid var(--signal); padding: 16px 18px 20px; }
+.eye-big { width: 84px; height: 54px; display: block; margin-bottom: 4px; }
+h3 { font: 800 26px/1.1 var(--wide); letter-spacing: -.03em; margin: 6px 0 8px; }
+.sheet p, .ci p { margin: 0 0 12px; color: var(--n-muted); font-size: 18px; }
+.plan { font-weight: 700; font-size: 19px; color: var(--paint); border-left: 6px solid var(--signal); padding: 4px 0 4px 12px; margin: 0 0 12px; }
+.stripes { display: flex; gap: 6px; height: 22px; margin: 4px 0 6px; }
+.stripes i { flex: 1; background: var(--paint); }
+.stripes i.gone { background: var(--n-line); }
+.stripes-l { font-size: 15px; color: var(--n-muted); margin: 0 0 8px; }
+.pbtn { display: flex; align-items: center; justify-content: center; min-height: 64px; padding: 0 16px; text-align: center; font: 700 21px var(--body); margin-top: 10px; }
+.pbtn.go { background: var(--signal); color: var(--ink); }
+.pbtn.alt { min-height: 56px; border: 3px solid var(--paint); color: var(--paint); font-size: 19px; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ci { flex: 1; display: flex; flex-direction: column; padding: 16px 18px 20px; }
+.ci-top { display: flex; justify-content: space-between; align-items: center; font-size: 15px; color: var(--n-muted); }
+.e112 { border: 3px solid #FF9E8F; color: #FF9E8F; padding: 6px 12px; font-weight: 700; }
+.count-row { display: flex; align-items: center; gap: 14px; margin: 16px 0 4px; }
+.count-row svg { width: 112px; height: 72px; }
+.count-row b { font: 900 76px/1 var(--wide); letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.grow { flex: 1; }
+.moments { background: var(--ink); padding: 32px 16px 64px; }
+.moments .in { max-width: 1180px; margin: 0 auto; display: grid; gap: 32px; }
+.moments figure { margin: 0; }
+.moments figcaption { text-align: center; color: var(--signal); font-size: 15px; margin-top: 10px; }
+@media (min-width: 760px) { .moments .in { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="eye-ink" viewBox="0 0 120 76"><path d="M6 38 C 28 4, 92 4, 114 38 C 92 72, 28 72, 6 38 Z" fill="#FFFFFF" stroke="#121212" stroke-width="7"/><circle cx="60" cy="38" r="16" fill="#121212"/><rect x="54" y="31" width="4" height="14" fill="#FFD23F"/><rect x="62" y="31" width="4" height="14" fill="#FFD23F"/></symbol>
+    <symbol id="eye-paint" viewBox="0 0 120 76"><path d="M6 38 C 28 4, 92 4, 114 38 C 92 72, 28 72, 6 38 Z" fill="#1F232B" stroke="#F5F5F0" stroke-width="7"/><circle cx="60" cy="38" r="16" fill="#FFD23F"/><rect x="54" y="31" width="4" height="14" fill="#1F232B"/><rect x="62" y="31" width="4" height="14" fill="#1F232B"/></symbol>
+    <symbol id="eye-lid" viewBox="0 0 120 76"><path d="M6 38 C 28 4, 92 4, 114 38 C 92 72, 28 72, 6 38 Z" fill="#1F232B" stroke="#F5F5F0" stroke-width="7"/><circle cx="60" cy="40" r="16" fill="#FFD23F"/><path d="M6 38 C 28 4, 92 4, 114 38 L114 38 Q60 50 6 38 Z" fill="#2A2F39" stroke="#F5F5F0" stroke-width="7" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+<p class="review">Direction C: Crosswalk, the bold risk (preview of the landing hero, the second-look prompt and the check-in)</p>
+<header class="bar"><svg><use href="#eye-ink"/></svg>SecondLook<a class="btn primary go" href="#">Try it now</a></header>
+<section class="hero">
+  <div>
+    <h1>Stop. Look. Then send.</h1>
+    <p>Drinking breaks the judgment you'd need to notice you're too drunk to drive. SecondLook is a crossing signal for your night: it pauses the risky moment, then gets you home the way you planned while sober.</p>
+    <div class="cta"><a class="btn primary" href="#">Try it now (20 seconds)</a><a class="btn quiet" href="#">Set it up</a></div>
+    <div class="zebra" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+  <div class="phone" aria-label="A late-night message gets a second look">
+    <div class="p-head"><span class="av">J</span><b>Jordan</b></div>
+    <div class="p-body"><p class="bub">are u still at the party?</p><p class="bub">how r u getting home</p></div>
+    <div class="sheet">
+      <svg class="eye-big"><use href="#eye-paint"/></svg>
+      <h3>Want a second look?</h3>
+      <p>“heyy im fnie cna drive hme lol” doesn't look like you.</p>
+      <div class="pbtn go">Edit my message</div>
+    </div>
+  </div>
+</section>
+<section class="moments"><div class="in">
+  <figure>
+    <div class="phone">
+      <div class="p-head"><span class="av">J</span><b>Jordan</b></div>
+      <div class="p-body"><p class="bub">are u still at the party?</p></div>
+      <div class="sheet">
+        <svg class="eye-big"><use href="#eye-paint"/></svg>
+        <h3>Want a second look?</h3>
+        <p>This doesn't look like how you usually text: more misspelled words.</p>
+        <p class="plan">Your plan: an Uber home.</p>
+        <div class="stripes" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="gone"></i><i class="gone"></i><i class="gone"></i></div>
+        <p class="stripes-l">Checking in with you in 20 seconds</p>
+        <div class="pbtn go">Edit my message</div>
+        <div class="pbtn alt">Send it anyway</div>
+      </div>
+    </div>
+    <figcaption>The second-look prompt</figcaption>
+  </figure>
+  <figure>
+    <div class="phone">
+      <div class="ci">
+        <div class="ci-top"><span>SecondLook</span><span class="e112">112</span></div>
+        <div class="count-row"><svg><use href="#eye-lid"/></svg><b>28</b></div>
+        <div class="stripes" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i class="gone"></i><i class="gone"></i><i class="gone"></i><i class="gone"></i><i class="gone"></i></div>
+        <h3>Hey Alex. Just checking in.</h3>
+        <p>If you don't answer, Priya gets a message.</p>
+        <p class="plan">“Don't drive, Alex. Seriously.”</p>
+        <div class="grow"></div>
+        <div class="pbtn go">Open Uber, like you planned</div>
+        <div class="pair"><div class="pbtn alt">Call Priya</div><div class="pbtn alt">Text Priya</div></div>
+      </div>
+    </div>
+    <figcaption>The check-in: one stripe disappears per tick</figcaption>
+  </figure>
+</div></section>
+</body>
+</html>
