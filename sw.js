@@ -1,12 +1,12 @@
 /* SecondLook service worker: network first, cache as offline fallback. */
-var CACHE = 'secondlook-v6';
+var CACHE = 'secondlook-v7';
 var ASSETS = [
   './', './index.html', './contact.html', './study.html', './manifest.webmanifest',
   './css/tokens.css', './css/style.css',
   './assets/icon.svg', './assets/icon-192.png', './assets/icon-512.png',
-  './assets/fonts/atkinson-hyperlegible-400.woff2', './assets/fonts/atkinson-hyperlegible-700.woff2', './assets/fonts/bricolage-grotesque-var.woff2',
+  './assets/fonts/atkinson-hyperlegible-400.woff2', './assets/fonts/atkinson-hyperlegible-700.woff2', './assets/fonts/geist-var.woff2',
   './js/storage.js', './js/words.js', './js/metrics.js', './js/share.js', './js/rides.js', './js/secure.js', './js/relay.js',
-  './js/qr.js', './js/nightout.js', './js/icons.js', './js/sonar.js', './js/tests.js', './js/app.js', './js/contact.js', './js/study.js'
+  './js/qr.js', './js/nightout.js', './js/icons.js', './js/sonar.js', './js/pixel.js', './js/tests.js', './js/app.js', './js/contact.js', './js/study.js'
 ];
 
 self.addEventListener('install', function (e) {
